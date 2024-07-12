@@ -14,9 +14,11 @@ app.get("/", (request, response) => {
     response.render("index");
 });
 
+app.get("/databases/new", (_, response) => {
+    response.render("crear-tabla");
+});
+
 app.post("/", (request, response) => {
-    response.render("index-response", request.body);
-    console.log(request.body);
 });
 
 app.use("/web", express.static(path.join(__dirname, "/web")));

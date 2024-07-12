@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Edgar Trejo Avila">
-    <link rel="stylesheet" href="./main.css">
-    <script defer src="/web/js/table-creation-form.js"></script>
-    <title>Proyecto Del Tercer Parcial</title>
-</head>
-<body>
+<%- include('templates/header') %>
+
     <template id="columnTemplate">
-        <tr data-column-index="1">
+        <tr>
             <td>
-                <input type="text" name="columnNames" id="" required>
+                <input type="text" name="columnNames" required>
             </td>
             <td>
-                <select name="columnTypes" id="" required>
+                <select name="columnTypes" required>
                     <option value="int">INT</option>
                     <option value="varchar">VARCHAR</option>
                     <option value="date">DATE</option>
@@ -24,13 +14,13 @@
                 </select>
             </td>
             <td>
-                <input type="number" name="columnLengths" value="8">
+                <input type="number" name="columnLengths" value="8" required>
             </td>
         </tr>
     </template>
     <section>
         <h1>Crear tabla</h1>
-        <form action="" id="createTableForm">
+        <form action="/databases/new" id="createTableForm" method="post">
             <div>
                 <input type="text" name="" id="" placeholder="Nombre de la tabla">
             </div>
@@ -53,7 +43,6 @@
             </table>
         </form>
     </section>
-</body>
-</html>
 
 
+<%- include('templates/footer') %>
