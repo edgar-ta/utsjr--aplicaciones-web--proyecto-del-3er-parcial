@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Edgar Trejo Avila">
+    <link rel="stylesheet" href="./main.css">
+    <script defer src="/web/js/table-creation-form.js"></script>
+    <title>Proyecto Del Tercer Parcial</title>
+</head>
+<body>
+    <template id="columnTemplate">
+        <tr data-column-index="1">
+            <td>
+                <input type="text" name="columnNames" id="" required>
+            </td>
+            <td>
+                <select name="columnTypes" id="" required>
+                    <option value="int">INT</option>
+                    <option value="varchar">VARCHAR</option>
+                    <option value="date">DATE</option>
+                    <option value="double">DOUBLE</option>
+                </select>
+            </td>
+            <td>
+                <input type="number" name="columnLengths" value="8">
+            </td>
+        </tr>
+    </template>
+    <section>
+        <h1>Crear tabla</h1>
+        <form action="" id="createTableForm">
+            <div>
+                <input type="text" name="" id="" placeholder="Nombre de la tabla">
+            </div>
+            <div>
+                <label for="columnCountInput">Número de columnas</label>
+                <input type="number" name="columnCount" id="columnCountInput" value="0" min="0" max="30">
+            </div>
+            <input type="submit" value="Crear tabla">
+            <table id="tableExample">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Longitud</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                </tbody>
+            </table>
+        </form>
+    </section>
+</body>
+</html>
+
+
