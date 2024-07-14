@@ -1,4 +1,5 @@
-<%- include('templates/header') %>
+<%- include('./menu-lateral.ejs') %>
+    <script defer src="/web/js/table-creation-form.js"></script>
 
     <template id="columnTemplate">
         <tr>
@@ -6,43 +7,68 @@
                 <input type="text" name="columnNames" required>
             </td>
             <td>
-                <select name="columnTypes" required>
-                    <option value="int">INT</option>
-                    <option value="varchar">VARCHAR</option>
-                    <option value="date">DATE</option>
-                    <option value="double">DOUBLE</option>
+                <select name="columnDataTypes" required>
+                    <option value="int" selected>
+                        Entero
+                    </option>
+                    <option value="double">
+                        Decimal
+                    </option>
+                    <option value="date">
+                        Fecha
+                    </option>
+                    <option value="text">
+                        Texto
+                    </option>
                 </select>
             </td>
             <td>
-                <input type="number" name="columnLengths" value="8" required>
+                <select name="columnKeyTypes" required>
+                    <option value="" selected>
+                        Ninguna
+                    </option>
+                    <option value="PRI">
+                        Clave primaria
+                    </option>
+                    <option value="UNI">
+                        Clave candidata
+                    </option>
+                    <option value="MUL">
+                        Clave repetida
+                    </option>
+                </select>
+            </td>
+            <td>
+                <input type="checkbox" name="columnNullabilities">
+            </td>
+            <td>
+                <input type="checkbox" name="columnAutoincrementability">
             </td>
         </tr>
     </template>
     <section>
         <h1>Crear tabla</h1>
-        <form action="/databases/new" id="createTableForm" method="post">
+        <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post">
             <div>
                 <input type="text" name="" id="" placeholder="Nombre de la tabla">
             </div>
             <div>
                 <label for="columnCountInput">Número de columnas</label>
-                <input type="number" name="columnCount" id="columnCountInput" value="0" min="0" max="30">
+                <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30">
             </div>
             <input type="submit" value="Crear tabla">
             <table id="tableExample">
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Longitud</th>
+                        <th>Tipo de dato</th>
+                        <th>Tipo de clave</th>
+                        <th>Es nulo</th>
+                        <th>Es autoincrementable</th>
                     </tr>
                 </thead>
                 <tbody>
-        
                 </tbody>
             </table>
         </form>
     </section>
-
-
-<%- include('templates/footer') %>
