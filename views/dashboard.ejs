@@ -1,0 +1,39 @@
+<%- include("./templates/header.ejs"); %>
+    <%- include('./menu-lateral.ejs') %>
+    <div class="contenido">
+        <% 
+        if (typeof informacionDeRegistros == "undefined" && typeof informacionDeTablas != "undefined") { 
+            %>
+
+            <h1>
+                <%- informacionDeTablas.baseDeDatosSeleccionada %>
+            </h1>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr);">
+
+            <%
+            for (let tabla of informacionDeTablas.tablas) {
+                %>
+                <div class="contenido">
+                <a href="/databases/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- tabla %>">
+                    <%= tabla %>
+                </a>
+            </div>
+                <%
+            }
+            %>
+                <a href="/new/<%- informacionDeTablas.baseDeDatosSeleccionada %>/table">Crear tabla</a>
+
+            </div>
+
+        <%
+        } else if (typeof informacionDeRegistros != "undefined") {
+            %>
+            <%- 
+                include("./tabla-de-registros");
+            %>
+            <%
+        }
+        %>
+    </div>
+<%- include("./templates/footer.ejs"); %>
