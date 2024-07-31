@@ -1,13 +1,13 @@
 const mysql = require("mysql2/promise");
 
-class SingletonConexion {
-    /** @type {import("mysql2/typings/mysql/lib/Connection").Connection} */
-    static instancia = null;
+class SingletonConnection {
+    /** @type {import("mysql2").Pool} */
+    static instance = null;
 
-    static async conectar() {
-        if (SingletonConexion.instancia == null) {
+    static connect() {
+        if (SingletonConnection.instance == null) {
             try {
-                SingletonConexion.instancia = await mysql.createConnection({
+                SingletonConnection.instance = mysql.createPool({
                   host: process.env.HOSTMYSQL,
                   user: process.env.USERMYSQL,
                   password: process.env.PASSWORDMYSQL,
@@ -17,14 +17,15 @@ class SingletonConexion {
                 console.log("Conexion CREADA a MySQL");
             } catch (error) {
                 console.error("Error al crear la conexion " + error);
+                throw error;
             }
         }
     }
 
-    static async desconectar() {
-        if (SingletonConexion.instancia != null) {
+    static disconnect() {
+        if (SingletonConnection.instance != null) {
             try {
-              await SingletonConexion.instancia.end();
+              SingletonConnection.instance.end();
               console.log("Conexion cerrada de MySQL");
             } catch (error) {
               console.error("Error al cerrar la conexion");
@@ -33,4 +34,4 @@ class SingletonConexion {
     }
 }
 
-module.exports = SingletonConexion;
+module.exports = SingletonConnection;
