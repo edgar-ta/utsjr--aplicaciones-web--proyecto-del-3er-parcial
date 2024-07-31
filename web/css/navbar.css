@@ -1,0 +1,16 @@
+:root {
+    --navbar-height: 5rem;
+}
+
+.barra-de-navegacion {
+    display: flex;
+    flex-direction: row;
+    height: var(--navbar-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--main-blue);
+    z-index: 10;    
+}
+

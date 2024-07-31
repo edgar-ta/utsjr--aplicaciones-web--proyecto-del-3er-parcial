@@ -1,6 +1,17 @@
 <%- include("./templates/header.ejs"); %>
+
+<link rel="stylesheet" href="/web/css/dashboard.css">
+<main style="
+padding-top: var(--navbar-height);
+display: grid;
+grid-template-columns: auto 1fr;
+align-items: stretch;
+justify-content: stretch;
+">
     <%- include('./menu-lateral.ejs') %>
-    <div class="contenido">
+    <div class="dashboard__wrapper">
+        <button class="sidebar__toggle-button" data-id="toggle-button" onclick="toggleSidebar()">Cerrar Menú</button>
+
         <% 
         if (typeof informacionDeRegistros == "undefined" && typeof informacionDeTablas != "undefined") { 
             %>
@@ -9,21 +20,21 @@
                 <%- informacionDeTablas.baseDeDatosSeleccionada %>
             </h1>
 
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr);">
-
-            <%
-            for (let tabla of informacionDeTablas.tablas) {
-                %>
-                <div class="contenido">
-                <a href="/databases/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- tabla %>">
-                    <%= tabla %>
+            <div class="dashboard__card-container">
+                <a href="/new/<%- informacionDeTablas.baseDeDatosSeleccionada %>/table" class="dashboard__table-card dashboard__table-card--new-card">
+                    <span class="dashboard__table-card__name">
+                        Crear tabla
+                    </span>
                 </a>
-            </div>
                 <%
-            }
-            %>
-                <a href="/new/<%- informacionDeTablas.baseDeDatosSeleccionada %>/table">Crear tabla</a>
-
+                    for (let tabla of informacionDeTablas.tablas) {
+                %>
+                    <a class="dashboard__table-card" href="/databases/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- tabla %>">
+                        <%= tabla %>
+                    </a>
+                <%
+                }
+                %>
             </div>
 
         <%
@@ -36,4 +47,6 @@
         }
         %>
     </div>
+</main>
+
 <%- include("./templates/footer.ejs"); %>

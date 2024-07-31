@@ -1,41 +1,45 @@
-<%- include("./templates/header.ejs"); %>
-<div>
-    <div id="main">
-        <button class="togglebtn" onclick="toggleNav()">Abrir Menú</button>
-    </div>
-    <div class="sidebar" id="sidebar">
-<ul>
-    <% 
-    for (let baseDeDatos of basesDeDatos) {
+<link rel="stylesheet" href="/web/css/menu-lateral.css">
+
+<div class="sidebar__panel" data-id="sidebar" data-state="open">
+    <ul>
+        <% 
+        for (let baseDeDatos of basesDeDatos) {
         %>
-        <li >
-            <a href="/databases/<%- baseDeDatos %>">
-                <%- baseDeDatos %>
-            </a>
-        
-            <%
-                if (typeof informacionDeRegistros != "undefined" && typeof informacionDeTablas != "undefined" && 
-                informacionDeTablas.baseDeDatosSeleccionada == baseDeDatos) {
-                    %>
-                    
-                        <ul>
-                            <% 
-                            for (let tabla of informacionDeTablas.tablas) {
+            <li>
+                <a href="/databases/<%- baseDeDatos %>">
+                    <%- baseDeDatos %>
+                </a>
+            
+                <%
+                    if (
+                        typeof informacionDeRegistros != "undefined" && 
+                        typeof informacionDeTablas != "undefined" && 
+                        informacionDeTablas.baseDeDatosSeleccionada == baseDeDatos
+                    ) {
+                %>
+                        
+                            <ul>
+                                <% 
+                                for (let tabla of informacionDeTablas.tablas) {
                                 %>
-                                <li> 
-                                    <a href="/databases/<%- baseDeDatos %>/<%- tabla %>"><%- tabla %></a>
-                                </li>
+                                    <li> 
+                                        <a href="/databases/<%- baseDeDatos %>/<%- tabla %>">
+                                            <%- tabla %>
+                                        </a>
+                                    </li>
                                 <%
-                            }
-                            %>
-                        </ul>
-                    
-                    <%
-                }
-            %>
-        </li>
+                                }
+                                %>
+                            </ul>
+                        
+                <%
+                    }
+                %>
+            </li>
         <%
-    }
-    %>
-</ul>
+        }
+        %>
+    </ul>
 </div>
+
+<script src="/web/js/menu-lateral.js"></script>

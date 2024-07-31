@@ -1,0 +1,31 @@
+.dashboard__wrapper {
+    min-height: 100vh;
+    background-color: white;
+    padding: 4rem 12rem;
+    flex-grow: 1;
+}
+
+.dashboard__table-card {
+    display: flex;
+    background-color: pink;
+    min-height: 10rem;
+    border-radius: 3px;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard__table-card {
+    text-decoration: none;
+}
+
+.dashboard__table-card--new-card {
+    background-color: white;
+    border: 1px solid pink;
+}
+
+.dashboard__card-container {
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
