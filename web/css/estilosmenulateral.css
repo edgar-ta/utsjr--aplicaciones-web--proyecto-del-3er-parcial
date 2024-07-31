@@ -1,0 +1,121 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.sidebar {
+    margin-top: 10%;
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: aquamarine;
+    overflow-x: hidden;
+    transition: 0.5s;
+    display: flex;
+    flex-direction: column;
+    padding-top: 60px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    flex: 1;
+}
+
+.sidebar li {
+    padding: 8px 8px 8px 32px;
+    font-size: 20px;
+    color: #818181;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.sidebar li:hover {
+    color: #f1f1f1;
+}
+
+.menu-header {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.submenu {
+    display: none;
+    padding-left: 20px;
+    flex-direction: column; /* Para usar flexbox en el submenu */
+}
+
+.submenu.show {
+    display: flex; /* Mostrar usando flexbox */
+}
+
+.togglebtn {
+    font-size: 20px;
+    cursor: pointer;
+    background-color: #c7712a;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    margin-top: 10%;
+    position: fixed;
+}
+
+.togglebtn:hover {
+    background-color: #444;
+}
+
+#main {
+    transition: margin-left 0.5s;
+    padding: 16px;
+    display: flex;
+    flex-direction: row;
+    position: static;
+}
+
+.contenido {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    margin: auto;
+}
+.portada{
+    width: 20%;
+    height: auto;
+}
+.bienvenida{
+    font-family: sans-serif;
+    color: white;
+}
+.barradenavegacion{
+    display: flex;
+    flex-direction: row;
+    height: 150px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(11,2,58,1);
+    
+z-index: 10;    
+}
+.paisaje{
+    opacity: .9;
+    width: 100%;
+    height: auto;
+    margin-top: 10%;
+}
+.contenedor{
+    background-image: url("/web/images/imagenpaisaje.jpg");
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-repeat: no-repeat;
+}

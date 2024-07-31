@@ -1,5 +1,6 @@
 <%- include("./templates/header.ejs"); %>
     <%- include('./menu-lateral.ejs') %>
+    <div class="contenido">
         <% 
         if (typeof informacionDeRegistros == "undefined" && typeof informacionDeTablas != "undefined") { 
             %>
@@ -13,9 +14,11 @@
             <%
             for (let tabla of informacionDeTablas.tablas) {
                 %>
+                <div class="contenido">
                 <a href="/databases/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- tabla %>">
                     <%= tabla %>
                 </a>
+            </div>
                 <%
             }
             %>
@@ -32,4 +35,5 @@
             <%
         }
         %>
+    </div>
 <%- include("./templates/footer.ejs"); %>
