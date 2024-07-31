@@ -14,7 +14,7 @@
     width: 25vw;
 }
 
-.sidebar__panel ul {
+.sidebar__panel > ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -41,8 +41,10 @@
     color: #818181;
     transition: 0.3s;
     height: fit-content;
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .sidebar__panel li a {
@@ -50,11 +52,21 @@
     display: inline-flex;
     width: 100%;
     transition: 0.3s;
+    box-sizing: border-box;
 }
 
 .sidebar__panel li a:hover {
     background-color: gray;
     color: white;
+}
+
+.sidebar__panel > ul > li > ul {
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar__panel > ul > li > ul > li > a {
+    padding-left: 6rem;
 }
 
 .sidebar__toggle-button {

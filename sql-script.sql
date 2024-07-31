@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS proyecto_del_parcial_3;
+CREATE DATABASE proyecto_del_parcial_3;
+USE proyecto_del_parcial_3;
+
 DROP TABLE IF EXISTS base_de_datos;
 CREATE TABLE base_de_datos (
 	id INT NOT NULL AUTO_INCREMENT,
@@ -23,8 +27,8 @@ ENGINE = InnoDB
 
 INSERT INTO base_de_datos VALUES (NULL, "Base de datos 1"), (NULL, "Base de datos 2");
 INSERT INTO tabla VALUES 
-	(NULL, 1, "Algo xd", ""),
-    (NULL, 1, "Algo mas xd", "")
+	(NULL, 1, "Algo xd", "abc1"),
+    (NULL, 1, "Algo mas xd", "abc2")
 ;
 
 DROP TABLE IF EXISTS abc1;
