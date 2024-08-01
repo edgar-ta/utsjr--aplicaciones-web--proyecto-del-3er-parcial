@@ -2,15 +2,16 @@
 
         <template id="columnTemplate">
             <tr>
+                <td data-id="row-index">#</td>
                 <td>
-                    <input type="text" name="columnNames" required>
+                    <input type="text" name="nameArray" required>
                 </td>
-                <td>
-                    <select name="columnDataTypes" required>
-                        <option value="int" selected>
+                <td data-id="row-type">
+                    <select name="dataTypeArray" required>
+                        <option value="integer" selected>
                             Entero
                         </option>
-                        <option value="double">
+                        <option value="decimal">
                             Decimal
                         </option>
                         <option value="date">
@@ -19,29 +20,22 @@
                         <option value="text">
                             Texto
                         </option>
-                    </select>
-                </td>
-                <td>
-                    <select name="columnKeyTypes" required>
-                        <option value="" selected>
-                            Ninguna
-                        </option>
-                        <option value="PRI">
-                            Clave primaria
-                        </option>
-                        <option value="UNI">
-                            Clave candidata
-                        </option>
-                        <option value="MUL">
-                            Clave repetida
+                        <option value="reference">
+                            Referencia
                         </option>
                     </select>
                 </td>
                 <td>
-                    <input type="checkbox" name="columnNullabilities">
+                    <input type="radio" name="isPrimaryKeyArray" data-disabled-count="0" required>
                 </td>
                 <td>
-                    <input type="checkbox" name="columnAutoincrementability">
+                    <input type="checkbox" name="isNullableArray" data-disabled-count="0">
+                </td>
+                <td>
+                    <input type="checkbox" name="isUniqueArray" data-disabled-count="0">
+                </td>
+                <td>
+                    <input type="checkbox" name="isAutoincrementableArray" data-disabled-count="0">
                 </td>
             </tr>
         </template>
@@ -49,7 +43,8 @@
             <h1>Crear tabla</h1>
             <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post">
                 <div>
-                    <input type="text" name="" id="" placeholder="Nombre de la tabla">
+                    <label for="tableNameInput">Nombre de la tabla</label>
+                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla">
                 </div>
                 <div>
                     <label for="columnCountInput">Número de columnas</label>
@@ -59,10 +54,12 @@
                 <table id="tableExample">
                     <thead>
                         <tr>
+                            <th>Índice</th>
                             <th>Nombre</th>
                             <th>Tipo de dato</th>
-                            <th>Tipo de clave</th>
+                            <th>Es clave primaria</th>
                             <th>Es nulo</th>
+                            <th>Es único</th>
                             <th>Es autoincrementable</th>
                         </tr>
                     </thead>
