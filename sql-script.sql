@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS proyecto_del_parcial_3;
-CREATE DATABASE proyecto_del_parcial_3;
-USE proyecto_del_parcial_3;
+-- DROP DATABASE IF EXISTS proyecto_del_parcial_3;
+-- CREATE DATABASE proyecto_del_parcial_3;
+-- USE proyecto_del_parcial_3;
 
 DROP TABLE IF EXISTS base_de_datos;
 CREATE TABLE base_de_datos (
