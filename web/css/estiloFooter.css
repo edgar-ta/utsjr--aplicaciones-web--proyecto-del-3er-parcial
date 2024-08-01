@@ -17,7 +17,7 @@ body{
 }
 .footer-row{
     display: flex;
-    justifiy-content:end;
+    justifiy-content:center;
     flex-wrap: wrap;
 }
 .footer-links{
