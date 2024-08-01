@@ -17,6 +17,7 @@ body{
 }
 .footer-row{
     display: flex;
+    justifiy-content:end;
     flex-wrap: wrap;
 }
 .footer-links{
