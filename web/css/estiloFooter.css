@@ -51,6 +51,10 @@ body{
     margin-bottom: 15px;
     transition: all .3 ease;
 }
+.img{
+    width:150px;
+    height:150px;
+}
 
 .footer-links ul li a:hover{
     color: #FFFFFF;
