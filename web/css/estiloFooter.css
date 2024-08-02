@@ -54,6 +54,7 @@ body{
 .img{
     width:150px;
     height:150px;
+    display:block;
 }
 
 .footer-links ul li a:hover{
