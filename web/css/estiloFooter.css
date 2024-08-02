@@ -42,6 +42,16 @@ body{
     margin-bottom: 15px;
     transition: all .3 ease;
 }
+
+.footer-links ul li {
+    font-size: 10px;
+    text-decoration: none;
+    color: #BBBBBB;
+    display: block;
+    margin-bottom: 15px;
+    transition: all .3 ease;
+}
+
 .footer-links ul li a:hover{
     color: #FFFFFF;
     padding-left: 6px;
