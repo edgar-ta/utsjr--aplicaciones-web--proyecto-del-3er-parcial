@@ -38,9 +38,13 @@ body{
     font-size: 10px;
     text-decoration: none;
     color: #BBBBBB;
-    display: block;
+    display: inline-block;
     margin-bottom: 15px;
     transition: all .3 ease;
+}
+.footer-links i{
+    width:150px;
+    height:150px;
 }
 
 .footer-links ul li {
