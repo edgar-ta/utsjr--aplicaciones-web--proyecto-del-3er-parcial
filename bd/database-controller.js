@@ -34,7 +34,9 @@ const SingletonConnection = require("./singleton-connection");
     SELECT tabla.nombre_externo AS nombre
     FROM tabla 
     INNER JOIN base_de_datos ON tabla.base_de_datos = base_de_datos.id 
-    WHERE base_de_datos.nombre = ?`,
+    WHERE base_de_datos.nombre = ?
+    ORDER BY tabla.nombre_externo
+    `,
     selectedDatabase
   );
 
@@ -44,6 +46,63 @@ const SingletonConnection = require("./singleton-connection");
   tables = tables.map(object => object.nombre);
   
   return tables;
+}
+
+/**
+ * 
+ * @param {string} selectedDatabase 
+ * @returns {Promise<{ nombreInterno: string, nombreExterno: string }>}
+ */
+async function getTablesWithBothNames(selectedDatabase) {
+  const sql = format(`
+    SELECT 
+      tabla.nombre_externo AS nombreExterno,
+      tabla.nombre_interno AS nombreInterno
+    FROM tabla 
+    INNER JOIN base_de_datos ON tabla.base_de_datos = base_de_datos.id 
+    WHERE base_de_datos.nombre = ?
+    ORDER BY tabla.nombre_externo
+    `,
+    selectedDatabase
+  );
+
+  await SingletonConnection.connect();
+
+  return (await SingletonConnection.instance.query(sql))[0];
+}
+
+/**
+ * Gets both the internal and external names of the tables
+ * in the given database that have a primary key; the query
+ * works under the assumption that every table has at most
+ * one primary key, which means that, if the functionality
+ * to have multiple primary keys is added in the future, the query
+ * should be changed, making sure to add a group and having clause
+ * such as the following:
+ * ```
+ * GROUP BY tabla.nombre_externo, tabla.nombre_interno
+ * HAVING COUNT(*) > 0
+ * ```
+ * 
+ * @param {string} selectedDatabase 
+ * @returns {Promise<{ nombreInterno: string, nombreExterno: string }>}
+ */
+async function getIndexedTablesWithBothNames(selectedDatabase) {
+  const sql = format(`
+    SELECT 
+      tabla.nombre_externo AS nombreExterno,
+      tabla.nombre_interno AS nombreInterno
+    FROM tabla 
+    INNER JOIN base_de_datos ON tabla.base_de_datos = base_de_datos.id
+    INNER JOIN information_schema.columns ON tabla.nombre_interno = information_schema.columns.TABLE_NAME
+    WHERE information_schema.columns.COLUMN_KEY = "PRI" AND base_de_datos.nombre = ?
+    `,
+    selectedDatabase
+  );
+
+  await SingletonConnection.connect();
+
+  return (await SingletonConnection.instance.query(sql))[0];
 }
 
 /**
@@ -98,4 +157,6 @@ module.exports = {
   getRegistries,
   getSchema,
   getTables,
+  getTablesWithBothNames,
+  getIndexedTablesWithBothNames
 }

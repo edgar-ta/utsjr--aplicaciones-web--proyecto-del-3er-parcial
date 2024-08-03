@@ -51,9 +51,14 @@ ruta.get("/databases/:selectedDatabase/:selectedTable", async (request, response
 });
 
 ruta.get("/new/:selectedDatabase/table", async (request, response) => {
+    const selectedDatabase = request.params.selectedDatabase;
+
     const databases = await DatabaseController.getDatabases() || [];
+    const tables = await DatabaseController.getIndexedTablesWithBothNames(selectedDatabase) || [];
+
     response.render("crear-tabla", { 
         basesDeDatos: databases, 
+        tablas: tables,
         baseDeDatosSeleccionada: request.params.selectedDatabase 
     });
 });

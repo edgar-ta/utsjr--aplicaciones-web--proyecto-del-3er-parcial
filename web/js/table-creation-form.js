@@ -10,6 +10,9 @@ const tableBody = table.querySelector("tbody");
 /** @type {HTMLTemplateElement} */
 const template = document.getElementById("columnTemplate");
 
+/** @type {HTMLFormElement} */
+const tableCreationForm = document.querySelector("[data-id='table-creation-form']");
+
 let previousColumnCount = 0;
 
 function updateTableColumnInputs() {
@@ -21,14 +24,15 @@ function updateTableColumnInputs() {
     if (delta > 0) {
         for (let i = 0; i < delta; i++) {
             /** @type {HTMLTemplateElement} */
-            const template = document.getElementById("columnTemplate");
-            const row = document.importNode(template.content, true);
-            const rowIndex = row.querySelector("[data-id='row-index']");
-            rowIndex.textContent = previousColumnCount + i + 1;
+            const template = document.querySelector("[data-id='column-template']");
+            const fragment = document.importNode(template.content, true);
+            const row = fragment.querySelector("tr");
+            const columnIndexCell = row.querySelector("[data-id='column-index-cell']");
+            columnIndexCell.textContent = previousColumnCount + i + 1;
 
             setupTypeSelectFunctionality(row);
 
-            tableBody.appendChild(row);
+            tableBody.appendChild(fragment);
         }
     } else {
         for (let i = 0; i < -delta; i++) {
@@ -45,28 +49,32 @@ function updateTableColumnInputs() {
  */
 function setupTypeSelectFunctionality(row) {
     /** @type {HTMLSelectElement} */
-    const typeSelect = row.querySelector("select");
+    const columnTypeSelect = row.querySelector("[data-id='column-type-select']");
+    const columnTypeCell = row.querySelector("[data-id='column-type-cell']");
 
     /** @type {HTMLInputElement} */
     const isAutoincrementableCheckbox = row.querySelector("[name='isAutoincrementableArray']");
     const isPrimaryKeyCheckbox = row.querySelector("[name='isPrimaryKeyArray']");
+    
 
-    disableCheckboxWhen(typeSelect, (value) => value != "integer",      isAutoincrementableCheckbox);
-    disableCheckboxWhen(typeSelect, (value) => value == "reference",    isPrimaryKeyCheckbox);
-    disableCheckboxWhen(typeSelect, (value) => value == "date",         isPrimaryKeyCheckbox);
-    disableCheckboxWhen(typeSelect, (value) => value == "decimal",      isPrimaryKeyCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (value) => value != "integer",      isAutoincrementableCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "reference",    isPrimaryKeyCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "date",         isPrimaryKeyCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "decimal",      isPrimaryKeyCheckbox);
 
-    const rowTypeCell = row.querySelector("[data-id='row-type']");
-    typeSelect.addEventListener("change", (event) => {
-        if (typeSelect.value == "reference") {
-            const p = document.createElement("p");
-            p.innerText = "Selecciona la tabla que quieras";
 
-            rowTypeCell.appendChild(p);
-
-            // 
+    columnTypeSelect.addEventListener("change", (event) => {
+        let columnReferencedTableForm = row.querySelector("[data-id='column-referenced-table-form']");
+        if (columnTypeSelect.value == "reference") {
+            if (columnReferencedTableForm === null) {
+                const columnReferencedTableFormTemplate = document.querySelector("[data-id='column-referenced-table-form-template']");
+                columnReferencedTableForm = document.importNode(columnReferencedTableFormTemplate.content, true);
+                columnTypeCell.appendChild(columnReferencedTableForm);
+            }
         } else {
-            rowTypeCell.removeChild(rowTypeCell.lastElementChild);
+            if (columnReferencedTableForm !== null) {
+                columnTypeCell.removeChild(columnReferencedTableForm);
+            }
         }
     });
 }
@@ -119,5 +127,16 @@ function disableCheckboxWhen(select, predicate, checkbox) {
 };
 
 columnCountInput.addEventListener("input", (event) => updateTableColumnInputs());
-
 updateTableColumnInputs();
+
+// tableCreationForm.addEventListener("submit", (event) => {
+//     event.preventDefault();
+
+//     /** @type {NodeListOf<HTMLInputElement>} */
+//     const columnNames = tableCreationForm.querySelectorAll("[data-id='column-name']");
+//     columnNames.forEach(columnName => {
+//         // if (!columnName.checkValidity()) {
+//         //     columnName.setCustomValidity("Ingresa el nombre de la columna");
+//         // }
+//     });
+// });
