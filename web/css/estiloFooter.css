@@ -35,13 +35,29 @@ body{
     display: inline-block;
 }
 .footer-links ul li a{
-    font-size: 10px;
+    font-size: 30px;
     text-decoration: none;
     color: #BBBBBB;
-    display: block;
+    display: inline;
+    margin-bottom: 15px;
+    margin-right:20px;
+    transition: all .3 ease;
+}
+
+.footer-links ul li {
+    font-size: 30px;
+    text-decoration: none;
+    color: #BBBBBB;
+    display: inline;
     margin-bottom: 15px;
     transition: all .3 ease;
 }
+.img{
+    width:150px;
+    height:150px;
+    display:block;
+}
+
 .footer-links ul li a:hover{
     color: #FFFFFF;
     padding-left: 6px;
