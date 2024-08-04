@@ -5,9 +5,93 @@
 .referenced-table-select[data-enabled="true"] {
     display: initial;
 }
-
+section{
+    padding: 15px;
+    margin-top: 50px;
+    border: 2px solid rgb(166, 155, 217);
+    border-radius: 9px;
+}
+#tableNameInput{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    border: 2px solid rgb(238, 182, 79);
+}
+.Name{
+    margin-left: 10px;
+    display: inline;
+    font-size: 14px;
+}
+.Info{
+    margin-bottom: 30px;
+}
+.colum{
+    padding: 15px;
+    display: inline;
+    font-size: 14px;
+}
+#columnCountInput{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    border: 2px solid rgb(238, 182, 79);
+}
+.button{
+    padding: 5px;
+    background-color: rgb(228, 181, 93);
+    border: 2px solid rgb(230, 149, 0);
+    margin-left: 10px;
+    color: white;
+}
 
 input[data-disabled] {
     pointer-events: none;
     opacity: 0.15;
+}
+
+tbody tr:nth-child(odd){
+    background-color: orange;
+    color: white;
+}
+thead th:nth-child(odd){
+    background-color: orange;
+    color: white;
+    border-top: 1px solid orange;
+}
+tbody h1{
+    font-size: 10px;
+}
+tbody input{
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+tbody tr:nth-child(odd) input{
+    color: white;
+}
+tbody select{
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+tbody tr:nth-child(odd) select{
+    color: white;
+}
+tbody tr:nth-child(odd) option{
+    background-color: orange;
+}
+tbody input[type="radio"]{
+    align-items: center;
+    margin-left: 40%;
+    cursor: pointer;
+}
+
+tbody input[type="checkbox"]{
+    align-items: center;
+    margin-left: 40%;
+    cursor: pointer;
+}
+tbody td{
+    padding: 15px;
+}
+thead tr th{
+    font-size: 14px;
 }

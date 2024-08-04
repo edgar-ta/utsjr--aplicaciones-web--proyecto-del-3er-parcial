@@ -15,8 +15,8 @@
         </template>
 
         <template data-id="column-template">
-            <tr data-id="column">
-                <td data-id="column-index-cell">#</td>
+            <tr>
+                <td class="id" data-id="column-index-cell">#</td>
                 <td>
                     <input type="text" name="nameArray" required data-id="column-name" value="">
                 </td>
@@ -62,15 +62,17 @@
         <section>
             <h1>Crear tabla</h1>
             <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post" data-id="table-creation-form">
-                <div>
+            <div class="Info">
+                <div class="Name">
                     <label for="tableNameInput">Nombre de la tabla</label>
                     <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla" required>
                 </div>
-                <div>
+                <div class="colum">
                     <label for="columnCountInput">Número de columnas</label>
                     <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30" required>
                 </div>
-                <input type="submit" value="Crear tabla">
+                <input class="button" type="submit" value="Crear tabla">
+            </div>
                 <table id="tableExample">
                     <thead>
                         <tr>
