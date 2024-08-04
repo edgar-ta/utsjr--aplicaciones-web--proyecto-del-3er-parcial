@@ -1,83 +1,68 @@
-.sidebar__panel {
+/* styles/menu-lateral.css */
+
+.navbar {
+    background-color: var(--main-blue);
+    color: white;
+    text-decoration: none;
+}
+
+.menu-horizontal {
+    list-style: none;
     display: flex;
-    height: 100%;
-    width: 0;
-    background-color: aquamarine;
-    overflow-x: hidden;
-    transition: 0.5s;
-    display: flex;
-    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+}
+
+.menu-horizontal .menu-item {
     position: relative;
-}
-
-.sidebar__panel[data-state="open"] {
-    width: 25vw;
-}
-
-.sidebar__panel > ul {
-    list-style-type: none;
-    padding: 0;
     margin: 0;
-    box-sizing: border-box;
+    padding: 0;
+    text-decoration: none;
+}
+
+.menu-horizontal .menu-item > a {
+    display: block;
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+}
+
+.menu-horizontal .menu-item > a:hover {
+    background-color: #575757;
+    text-decoration: none;
+}
+
+.submenu {
+    display: none;
     position: absolute;
-    top: 0;
+    top: 100%;
     left: 0;
-    width: 25vw;
-    height: 100%;
-    transition: 0.5s;
-}
-
-.sidebar__panel[data-state="open"] ul {
-    left: 0;
-}
-
-.sidebar__panel[data-state="closed"] ul {
-    left: -25vw;
-}
-
-.sidebar__panel li {
-    padding: 0;
-    font-size: 20px;
-    color: #818181;
-    transition: 0.3s;
-    height: fit-content;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.sidebar__panel li a {
-    padding: 1rem 3rem;
-    display: inline-flex;
-    width: 100%;
-    transition: 0.3s;
-    box-sizing: border-box;
-}
-
-.sidebar__panel li a:hover {
-    background-color: gray;
-    color: white;
-}
-
-.sidebar__panel > ul > li > ul {
+    background-color: var(--main-blue);
+    list-style: none;
     padding: 0;
     margin: 0;
+    text-decoration: none;
 }
 
-.sidebar__panel > ul > li > ul > li > a {
-    padding-left: 6rem;
+.submenu li {
+    margin: 0;
+    text-decoration: none;
 }
 
-.sidebar__toggle-button {
-    font-size: 20px;
-    cursor: pointer;
-    background-color: #c7712a;
+.submenu li a {
+    padding: 10px 20px;
     color: white;
-    padding: 10px 15px;
-    border: none;
+    text-decoration: none;
 }
 
-.sidebar__toggle-button:hover {
-    background-color: #444;
+.submenu li a:hover {
+    background-color: #575757;
+}
+
+.menu-item:hover .submenu {
+    display: block;
+}
+ul li{
+    text-decoration: none;
 }
