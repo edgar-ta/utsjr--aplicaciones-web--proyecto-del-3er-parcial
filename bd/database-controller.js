@@ -1,5 +1,8 @@
 const { format } = require("mysql2");
-const SingletonConnection = require("./singleton-connection");
+const { v4: uuidv4 } = require("uuid");
+
+const SingletonConnection = require("./singleton-connection.js");
+const TableCreationUtilities = require("../lib/table-creation-utilities.js");
 
 /**
  * @typedef {"integer" | "decimal" | "date" | "text" | "reference" } ExternalColumnType
@@ -235,39 +238,65 @@ async function tableExists(internalTableName) {
 
 /**
  * 
- * @param {IncomingColumnDescriptor} columnObject 
- * @returns {Promise<MidwayReferenceColumnDescriptor>}
+ * @param {string} internalTableName 
  */
-async function getMidwayReferenceDescriptor(columnObject) {
-  const sql = format(`
-    SELECT 
-        information_schema.columns.DATA_TYPE AS dataType, 
-        information_schema.columns.COLUMN_NAME as referencedTableColumn
-    FROM information_schema.columns 
-    WHERE 
-      information_schema.columns.TABLE_NAME = ? AND 
-      information_schema.columns.COLUMN_KEY = 'PRI'
-    ;
-    `, columnObject.referencedTableId
+async function deleteTable(internalTableName) {
+  const sql = format(
+    `DELETE FROM tabla WHERE tabla.nombre_interno = ?`, 
+    [internalTableName]
   );
 
   await SingletonConnection.connect();
 
-  const [ [ { dataType, referencedTableColumn } ] ] = await SingletonConnection.instance.execute(sql);
+  await SingletonConnection.instance.execute(sql);
+}
 
-  const { index, isAutoincrementable, isNullable, isPrimaryKey, isUnique, name, referencedTableId } = columnObject;
+/**
+ * 
+ * @param {string} externalTableName 
+ * @param {string} selectedDatabase 
+ * @param {IncomingColumnDescriptor[]} tableScheme 
+ */
+async function createTable(externalTableName, selectedDatabase, tableScheme) {
+  const foreignKeys = tableScheme
+    .filter(columnObject => columnObject.dataType == "reference");
+  const regularColumns = tableScheme
+    .filter(columnObject => columnObject.dataType != "reference");
 
-  return {
-    index,
-    dataType,
-    isAutoincrementable,
-    isNullable,
-    isPrimaryKey,
-    isUnique,
-    name,
-    referencedTableColumn,
-    referencedTableId
-  };
+  const midwayForeignKeys = await Promise.all(foreignKeys
+      .map(async (columnObject) => await TableCreationUtilities.getMidwayReferenceDescriptor(columnObject)));
+  const midwayRegularColumns = regularColumns
+    .map(columnObject => TableCreationUtilities.getMidwayPrimitiveDescriptor(columnObject));
+
+  const primitiveColumns = [ ...midwayForeignKeys, ...midwayRegularColumns ];
+  primitiveColumns.sort((columnObject) => columnObject.index);
+
+  const primitiveSql = primitiveColumns
+      .map((columnObject) => TableCreationUtilities.getSqlForPrimitiveColumn(columnObject));
+  const referenceSql = midwayForeignKeys.map((columnObject) => TableCreationUtilities
+      .getSqlForReferenceColumn(columnObject));
+
+  const internalTableName = uuidv4();
+  const tableBody = [...primitiveSql, ...referenceSql].join(",\n");
+  const databaseId = await getDatabaseId(selectedDatabase);
+
+  await SingletonConnection.connect();
+
+  const tableRegistrationSql = format(
+    `INSERT INTO tabla VALUES (NULL, ?, ?, ?)`, 
+    [databaseId, externalTableName, internalTableName]
+  );
+
+  await SingletonConnection.instance.execute(tableRegistrationSql);
+
+  try {
+    const tableCreationSql = `CREATE TABLE \`${internalTableName}\` (${tableBody}) ENGINE = InnoDB`;
+    await SingletonConnection.instance.execute(tableCreationSql);
+
+  } catch (error) {
+    await deleteTable(internalTableName);
+    throw error;
+  }
 }
 
 module.exports = {
@@ -278,6 +307,7 @@ module.exports = {
   getTables,
   getTablesWithBothNames,
   getIndexedTablesWithBothNames,
-  getMidwayReferenceDescriptor,
-  tableExists
+  tableExists,
+  createTable,
+  deleteTable
 }

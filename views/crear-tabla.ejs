@@ -61,7 +61,14 @@
         </template>
         <section>
             <h1>Crear tabla</h1>
-            <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post" data-id="table-creation-form">
+            <form 
+                action="/new/<%- baseDeDatosSeleccionada %>/table" 
+                id="createTableForm" 
+                method="post" 
+                data-id="table-creation-form" 
+                data-is-input-corrected="false"
+                data-unchecked-value="none"
+                >
             <div class="Info">
                 <div class="Name">
                     <label for="tableNameInput">Nombre de la tabla</label>

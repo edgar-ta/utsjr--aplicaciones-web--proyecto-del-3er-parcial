@@ -75,10 +75,14 @@ function validateIsPrimaryKeyGroup() {
         const row = button.parentElement.parentElement;
         /** @type {HTMLInputElement} */
         const isUniqueCheckbox = row.querySelector("[data-id='column-is-unique']");
+        const isNullableCheckbox = row.querySelector("[data-id='column-is-nullable']");
+
         if (button.checked) {
             lockFakeStateOf(isUniqueCheckbox, true);
+            lockFakeStateOf(isNullableCheckbox, false);
         } else {
             unlockFakeStateOf(isUniqueCheckbox);
+            unlockFakeStateOf(isNullableCheckbox);
         }
     });
 }
@@ -98,10 +102,11 @@ function setupTypeSelectFunctionality(row) {
     /** @type {HTMLInputElement} */
     const isAutoincrementableCheckbox = row.querySelector("[data-id='column-is-autoincrementable']");
 
-    disableCheckboxWhen(columnTypeSelect, (value) => value != "integer",      isAutoincrementableCheckbox);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "reference",    isPrimaryKeyRadioButton);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "date",         isPrimaryKeyRadioButton);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "decimal",      isPrimaryKeyRadioButton);
+    const isUniqueCheckbox = row.querySelector("[data-id='column-is-unique']");
+
+    disableCheckboxWhen(columnTypeSelect, (type) => type != "integer",      isAutoincrementableCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (type) => type != "integer",      isPrimaryKeyRadioButton);
+    disableCheckboxWhen(columnTypeSelect, (type) => type == "text",         isUniqueCheckbox);
 
     isPrimaryKeyRadioButton.addEventListener("change", () => validateIsPrimaryKeyGroup());
 
@@ -137,35 +142,45 @@ function getDisabledCountOf(checkbox) {
     return Number.parseInt(count);
 }
 
+function getPreviousStateOf(checkbox) {
+    const state = checkbox.getAttribute("data-previous-state");
+    if (state === null) return null;
+    return state == "checked";
+}
+
+function setPreviousStateOf(checkbox, callback) {
+    const previousState = getPreviousStateOf(checkbox);
+    checkbox.setAttribute("data-previous-state", callback(previousState));
+}
+
 function setDisabledCountOf(checkbox, callback) {
     const previousDisabledCount = getDisabledCountOf(checkbox);
     checkbox.setAttribute("data-disabled-count", callback(previousDisabledCount));
 }
 
-function lockFakeStateOf(checkbox, fakeState, increaseDisabledCount = true) {
+function lockFakeStateOf(checkbox, fakeState) {
     const count = getDisabledCountOf(checkbox);
+
     if (count == 0) {
-        checkbox.setAttribute("data-disabled", "true");
-        checkbox.setAttribute("data-previous-state", checkbox.checked? "checked": "unchecked");
-
-        if (increaseDisabledCount) {
-            setDisabledCountOf(checkbox, (value) => value + 1);
+        checkbox.setAttribute("disabled", "true");
+        
+        if (getPreviousStateOf(checkbox) === null) {
+            setPreviousStateOf(checkbox, () => checkbox.checked? "checked": "unchecked");
         }
-
-        checkbox.checked = fakeState;
+        
+        setDisabledCountOf(checkbox, (value) => value + 1);
     }
+    checkbox.checked = fakeState;
 }
 
-function unlockFakeStateOf(checkbox, decreaseDisabledCount = true) {
-    if (decreaseDisabledCount) {
-        setDisabledCountOf(checkbox, (value) => Math.max(value - 1, 0));
-    }
+function unlockFakeStateOf(checkbox) {
+    setDisabledCountOf(checkbox, (value) => Math.max(value - 1, 0));
 
     if (getDisabledCountOf(checkbox) == 0) {
         const previousState = checkbox.getAttribute("data-previous-state");
 
         checkbox.removeAttribute("data-previous-state");
-        checkbox.removeAttribute("data-disabled");
+        checkbox.removeAttribute("disabled");
         if (previousState !== null) {
             checkbox.checked = previousState == "checked";
         }
@@ -175,7 +190,7 @@ function unlockFakeStateOf(checkbox, decreaseDisabledCount = true) {
 /**
  * 
  * @param {HTMLInputElement} input 
- * @param {(string) => boolean} predicate 
+ * @param {(type: import("../../bd/database-controller").ExternalColumnType) => boolean} predicate 
  * @param {HTMLInputElement} checkbox 
  * @param {boolean} [fakeState=false] 
  * @param {string} [event="change"] 
@@ -186,17 +201,11 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
 
     input.addEventListener(event, () => {
 
-        /** @type {("checked" | "unchecked")?} */
-        const previousState = checkbox.getAttribute("data-previous-state");
-
-        if (previousState === null) {
-            checkbox.setAttribute("data-previous-state", checkbox.checked? "checked": "unchecked");
-        }
-
         const value = input.value;
 
         if (predicate(value)) {
-            lockFakeStateOf(checkbox, false, false);
+
+            lockFakeStateOf(checkbox, fakeState);
 
             if (!addedToQueue) {
                 checkbox.setAttribute("data-disabled-count", getDisabledCount() + 1);
@@ -208,7 +217,7 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
                 addedToQueue = false;
             }
 
-            unlockFakeStateOf(checkbox, false);
+            unlockFakeStateOf(checkbox);
         }
     });
 };
@@ -216,3 +225,30 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
 columnCountInput.addEventListener("input", (event) => updateTableColumnInputs());
 updateTableColumnInputs();
 
+const isInputCorrected = () => tableCreationForm.getAttribute("data-is-input-corrected") == "true";
+const setInputAsCorrected = () => tableCreationForm.setAttribute("data-is-input-corrected", "true");
+
+tableCreationForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (!isInputCorrected()) {
+        tableCreationForm.querySelectorAll("input[disabled][data-id='column-is-primary-key'],input[disabled][data-id='column-is-nullable'],input[disabled][data-id='column-is-unique'],input[disabled][data-id='column-is-autoincrementable']").forEach(input => {
+            // i don't really care about duplicating unchecked disabled inputs, since they already have the fallback
+            // value that prevents them from going unnoticed
+
+            // thus, i just need to duplicate the checked disabled inputs
+
+            if (input.checked) {
+                const newInput = document.createElement("input");
+                newInput.setAttribute("type", "hidden");
+                newInput.setAttribute("name", input.getAttribute("name"));
+                newInput.value = "on";
+            
+                input.insertAdjacentElement("afterend", newInput);
+            }
+        });
+        setInputAsCorrected();
+    }
+    
+    tableCreationForm.submit();
+});
