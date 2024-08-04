@@ -67,6 +67,24 @@ function setupValidationOnInput(input) {
 
 /**
  * 
+ */
+function validateIsPrimaryKeyGroup() {
+    /** @type {NodeListOf<HTMLInputElement>} */
+    const allRadioButtons = tableCreationForm.querySelectorAll("[data-id='column-is-primary-key']");
+    allRadioButtons.forEach(button => {
+        const row = button.parentElement.parentElement;
+        /** @type {HTMLInputElement} */
+        const isUniqueCheckbox = row.querySelector("[data-id='column-is-unique']");
+        if (button.checked) {
+            lockFakeStateOf(isUniqueCheckbox, true);
+        } else {
+            unlockFakeStateOf(isUniqueCheckbox);
+        }
+    });
+}
+
+/**
+ * 
  * @param {HTMLTableRowElement} row 
  */
 function setupTypeSelectFunctionality(row) {
@@ -75,16 +93,17 @@ function setupTypeSelectFunctionality(row) {
     const columnTypeCell = row.querySelector("[data-id='column-type-cell']");
 
     /** @type {HTMLInputElement} */
-    const isPrimaryKeyCheckbox = row.querySelector("[data-id='column-is-primary-key']");
-    
+    const isPrimaryKeyRadioButton = row.querySelector("[data-id='column-is-primary-key']");
+
     /** @type {HTMLInputElement} */
     const isAutoincrementableCheckbox = row.querySelector("[data-id='column-is-autoincrementable']");
 
     disableCheckboxWhen(columnTypeSelect, (value) => value != "integer",      isAutoincrementableCheckbox);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "reference",    isPrimaryKeyCheckbox);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "date",         isPrimaryKeyCheckbox);
-    disableCheckboxWhen(columnTypeSelect, (value) => value == "decimal",      isPrimaryKeyCheckbox);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "reference",    isPrimaryKeyRadioButton);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "date",         isPrimaryKeyRadioButton);
+    disableCheckboxWhen(columnTypeSelect, (value) => value == "decimal",      isPrimaryKeyRadioButton);
 
+    isPrimaryKeyRadioButton.addEventListener("change", () => validateIsPrimaryKeyGroup());
 
     columnTypeSelect.addEventListener("change", (event) => {
         let columnReferencedTableForm = row.querySelector("[data-id='column-referenced-table-form']");
@@ -105,22 +124,48 @@ function setupTypeSelectFunctionality(row) {
         }
     });
 
+    columnTypeSelect.addEventListener("change", () => validateIsPrimaryKeyGroup());
+
     /** @type {NodeListOf<HTMLInputElement>} */
     const inputs = row.querySelectorAll("input");
     inputs.forEach(input => setupValidationOnInput(input));
 }
 
+function getDisabledCountOf(checkbox) {
+    return Number.parseInt(checkbox.getAttribute("data-disabled-count"));
+}
+
+function lockFakeStateOf(checkbox, fakeState) {
+    if (getDisabledCountOf(checkbox) == 0) {
+        checkbox.setAttribute("disabled", "true");
+        checkbox.checked = fakeState;
+    }
+}
+
+function unlockFakeStateOf(checkbox) {
+    if (getDisabledCountOf(checkbox) == 0) {
+        const previousState = checkbox.getAttribute("data-previous-state");
+
+        checkbox.removeAttribute("data-previous-state");
+        checkbox.removeAttribute("disabled");
+        checkbox.checked = previousState == "checked";
+    }
+}
+
 /**
  * 
- * @param {HTMLSelectElement} select 
+ * @param {HTMLInputElement} input 
  * @param {(string) => boolean} predicate 
  * @param {HTMLInputElement} checkbox 
+ * @param {boolean} [fakeState=false] 
+ * @param {string} [event="change"] 
  */
-function disableCheckboxWhen(select, predicate, checkbox) {
+function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, event = "change") {
     let addedToQueue = false;
-    const getDisabledCount = () => Number.parseInt(checkbox.getAttribute("data-disabled-count"));
+    const getDisabledCount = () => getDisabledCountOf(checkbox);
 
-    select.addEventListener("change", () => {
+    input.addEventListener(event, () => {
+
         /** @type {("checked" | "unchecked")?} */
         const previousState = checkbox.getAttribute("data-previous-state");
 
@@ -128,13 +173,10 @@ function disableCheckboxWhen(select, predicate, checkbox) {
             checkbox.setAttribute("data-previous-state", checkbox.checked? "checked": "unchecked");
         }
 
-        const value = select.value;
+        const value = input.value;
 
         if (predicate(value)) {
-            if (getDisabledCount() == 0) {
-                checkbox.setAttribute("disabled", "true");
-                checkbox.checked = false;
-            }
+            lockFakeStateOf(checkbox);
 
             if (!addedToQueue) {
                 checkbox.setAttribute("data-disabled-count", getDisabledCount() + 1);
@@ -146,13 +188,7 @@ function disableCheckboxWhen(select, predicate, checkbox) {
                 addedToQueue = false;
             }
 
-            if (getDisabledCount() == 0) {
-                const previousState = checkbox.getAttribute("data-previous-state");
-
-                checkbox.removeAttribute("data-previous-state");
-                checkbox.removeAttribute("disabled");
-                checkbox.checked = previousState == "checked";
-            }
+            unlockFakeStateOf(checkbox);
         }
     });
 };
