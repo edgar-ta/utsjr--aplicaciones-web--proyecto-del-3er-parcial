@@ -60,11 +60,11 @@
             <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post" data-id="table-creation-form">
                 <div>
                     <label for="tableNameInput">Nombre de la tabla</label>
-                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla">
+                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla" required>
                 </div>
                 <div>
                     <label for="columnCountInput">Número de columnas</label>
-                    <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30">
+                    <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30" required>
                 </div>
                 <input type="submit" value="Crear tabla">
                 <table id="tableExample">
