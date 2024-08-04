@@ -1,0 +1,8 @@
+.referenced-table-select[data-enabled="false"] {
+    display: none;
+}
+
+.referenced-table-select[data-enabled="true"] {
+    display: initial;
+}
+

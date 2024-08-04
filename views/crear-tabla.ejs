@@ -1,13 +1,27 @@
 <%- include('./templates/long-header.ejs') %>
 
-        <template id="columnTemplate">
+        <link rel="stylesheet" href="/web/css/crear-tabla.css">
+        <template data-id="column-referenced-table-form-template">
+            <div data-id="column-referenced-table-form">
+                <h1>Tabla referenciada</h1>
+                <select name="referencedTablesArray" required data-id="column-referenced-table-select">
+                    <% for (let i = 0; i < tablas.length; i++) { 
+                        const tabla = tablas[i];
+                        %>
+                        <option value="<%- tabla.nombreInterno %>" <% if (i == 0) { %> selected <% } %> ><%- tabla.nombreExterno %></option>
+                    <% } %>
+                </select>
+            </div>
+        </template>
+
+        <template data-id="column-template">
             <tr>
-                <td data-id="row-index">#</td>
+                <td data-id="column-index-cell">#</td>
                 <td>
-                    <input type="text" name="nameArray" required>
+                    <input type="text" name="nameArray" required data-id="column-name" value="">
                 </td>
-                <td data-id="row-type">
-                    <select name="dataTypeArray" required>
+                <td data-id="column-type-cell">
+                    <select name="dataTypeArray" required data-id="column-type-select">
                         <option value="integer" selected>
                             Entero
                         </option>
@@ -20,35 +34,37 @@
                         <option value="text">
                             Texto
                         </option>
-                        <option value="reference">
-                            Referencia
-                        </option>
+                        <% if (tablas.length > 0) { %>
+                            <option value="reference">
+                                Referencia
+                            </option>
+                        <% } %>
                     </select>
                 </td>
                 <td>
-                    <input type="radio" name="isPrimaryKeyArray" data-disabled-count="0" required>
+                    <input type="radio" name="isPrimaryKeyArray" data-disabled-count="0" required data-id="column-is-primary-key">
                 </td>
                 <td>
-                    <input type="checkbox" name="isNullableArray" data-disabled-count="0">
+                    <input type="checkbox" name="isNullableArray" data-disabled-count="0" data-id="column-is-nullable">
                 </td>
                 <td>
-                    <input type="checkbox" name="isUniqueArray" data-disabled-count="0">
+                    <input type="checkbox" name="isUniqueArray" data-disabled-count="0" data-id="column-is-unique">
                 </td>
                 <td>
-                    <input type="checkbox" name="isAutoincrementableArray" data-disabled-count="0">
+                    <input type="checkbox" name="isAutoincrementableArray" data-disabled-count="0" data-id="column-is-autoincrementable">
                 </td>
             </tr>
         </template>
         <section>
             <h1>Crear tabla</h1>
-            <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post">
+            <form action="/new/<%- baseDeDatosSeleccionada %>/table" id="createTableForm" method="post" data-id="table-creation-form">
                 <div>
                     <label for="tableNameInput">Nombre de la tabla</label>
-                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla">
+                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla" required>
                 </div>
                 <div>
                     <label for="columnCountInput">Número de columnas</label>
-                    <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30">
+                    <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30" required>
                 </div>
                 <input type="submit" value="Crear tabla">
                 <table id="tableExample">

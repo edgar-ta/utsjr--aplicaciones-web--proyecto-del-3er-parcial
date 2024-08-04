@@ -1,6 +1,6 @@
--- DROP DATABASE IF EXISTS proyecto_del_parcial_3;
--- CREATE DATABASE proyecto_del_parcial_3;
--- USE proyecto_del_parcial_3;
+DROP DATABASE IF EXISTS proyecto_del_parcial_3;
+CREATE DATABASE proyecto_del_parcial_3;
+USE proyecto_del_parcial_3;
 
 DROP TABLE IF EXISTS base_de_datos;
 CREATE TABLE base_de_datos (
@@ -66,4 +66,32 @@ SELECT nombre_interno AS nombreDeTabla FROM tabla WHERE nombre_externo = "Algo x
 SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = "tabla" LIMIT 10;
 
 SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE LIMIT 50;
+
+    
+SELECT 
+  tabla.nombre_externo AS nombreExterno,
+  tabla.nombre_interno AS nombreInterno
+FROM tabla 
+INNER JOIN base_de_datos ON tabla.base_de_datos = base_de_datos.id
+INNER JOIN information_schema.columns ON tabla.nombre_interno = information_schema.columns.TABLE_NAME
+WHERE information_schema.columns.COLUMN_KEY = "PRI"
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

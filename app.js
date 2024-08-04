@@ -11,6 +11,8 @@ dotenv.config();
 
 app.set("view engine", "ejs");
 
+app.use(express.urlencoded({ extended: true }));
+
 const server = app.listen(port, async () => {
     console.log(`http://localhost:${port}`);
 
