@@ -4,10 +4,11 @@
         <template data-id="column-referenced-table-form-template">
             <div data-id="column-referenced-table-form">
                 <h1>Tabla referenciada</h1>
-                <select name="referencedTablesArray"required>
-                    <option value="">Ninguna</option>
-                    <% for (let tabla of tablas) { %>
-                        <option value="<%- tabla.nombreInterno %>"><%- tabla.nombreExterno %></option>
+                <select name="referencedTablesArray" required data-id="column-referenced-table-select">
+                    <% for (let i = 0; i < tablas.length; i++) { 
+                        const tabla = tablas[i];
+                        %>
+                        <option value="<%- tabla.nombreInterno %>" <% if (i == 0) { %> selected <% } %> ><%- tabla.nombreExterno %></option>
                     <% } %>
                 </select>
             </div>
@@ -17,7 +18,7 @@
             <tr>
                 <td data-id="column-index-cell">#</td>
                 <td>
-                    <input type="text" name="nameArray" required data-id="column-name">
+                    <input type="text" name="nameArray" required data-id="column-name" value="">
                 </td>
                 <td data-id="column-type-cell">
                     <select name="dataTypeArray" required data-id="column-type-select">

@@ -45,6 +45,28 @@ function updateTableColumnInputs() {
 
 /**
  * 
+ * @param {HTMLInputElement} input 
+ */
+function setupValidationOnInput(input) {
+    input.addEventListener("input", (event) => {
+        if (input.checkValidity()) {
+            input.parentElement.setAttribute("data-input-validity", "correct");
+        }
+
+        if (input.value == input.defaultValue) {
+            input.parentElement.removeAttribute("data-input-validity");
+        }
+    });
+
+    input.addEventListener("focusout", (event) => {
+        if (!input.checkValidity()) {
+            input.parentElement.setAttribute("data-input-validity", "incorrect");
+        }
+    });
+}
+
+/**
+ * 
  * @param {HTMLTableRowElement} row 
  */
 function setupTypeSelectFunctionality(row) {
@@ -53,9 +75,10 @@ function setupTypeSelectFunctionality(row) {
     const columnTypeCell = row.querySelector("[data-id='column-type-cell']");
 
     /** @type {HTMLInputElement} */
-    const isAutoincrementableCheckbox = row.querySelector("[name='isAutoincrementableArray']");
-    const isPrimaryKeyCheckbox = row.querySelector("[name='isPrimaryKeyArray']");
+    const isPrimaryKeyCheckbox = row.querySelector("[data-id='column-is-primary-key']");
     
+    /** @type {HTMLInputElement} */
+    const isAutoincrementableCheckbox = row.querySelector("[data-id='column-is-autoincrementable']");
 
     disableCheckboxWhen(columnTypeSelect, (value) => value != "integer",      isAutoincrementableCheckbox);
     disableCheckboxWhen(columnTypeSelect, (value) => value == "reference",    isPrimaryKeyCheckbox);
@@ -69,6 +92,10 @@ function setupTypeSelectFunctionality(row) {
             if (columnReferencedTableForm === null) {
                 const columnReferencedTableFormTemplate = document.querySelector("[data-id='column-referenced-table-form-template']");
                 columnReferencedTableForm = document.importNode(columnReferencedTableFormTemplate.content, true);
+
+                const columnReferencedTableSelect = columnReferencedTableForm.querySelector("[data-id='column-referenced-table-select']");
+                setupValidationOnInput(columnReferencedTableSelect);
+
                 columnTypeCell.appendChild(columnReferencedTableForm);
             }
         } else {
@@ -77,6 +104,10 @@ function setupTypeSelectFunctionality(row) {
             }
         }
     });
+
+    /** @type {NodeListOf<HTMLInputElement>} */
+    const inputs = row.querySelectorAll("input");
+    inputs.forEach(input => setupValidationOnInput(input));
 }
 
 /**
