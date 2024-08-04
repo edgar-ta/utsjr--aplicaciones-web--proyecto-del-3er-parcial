@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 
 const SingletonConnection = require("./singleton-connection.js");
 const TableCreationUtilities = require("../lib/table-creation-utilities.js");
+const convertToKebabCase = require("../lib/single-function-files/convert-to-kebab-case.js");
 
 /**
  * @typedef {"integer" | "decimal" | "date" | "text" | "reference" } ExternalColumnType
@@ -89,6 +90,30 @@ async function getDatabaseId(selectedDatabase) {
 
 }
 
+
+/**
+ * 
+ * @param {number} selectedDatabase 
+ * @returns {import("../lib/dashboard-utilities.js").DatabaseIdentifier[]}
+ */
+async function getDatabaseIdentifiers() {
+  await SingletonConnection.connect();
+  const sql = format(`SELECT base_de_datos.nombre AS name, base_de_datos.id AS id FROM base_de_datos`);
+
+  /** @type {{ name: string, id: string }[][]} */
+  const [ rawData ] = await SingletonConnection.instance.execute(sql);
+
+  return rawData.map(datum => {
+    const kebabCaseName = convertToKebabCase(datum.name);
+    const id = Number.parseInt(datum.id);
+    return {
+      name: datum.name,
+      kebabCaseName,
+      id
+    }
+  });
+}
+
 /**
  * 
  * @param {string} selectedDatabase 
@@ -129,6 +154,28 @@ async function getTablesWithBothNames(selectedDatabase) {
     ORDER BY tabla.nombre_externo
     `,
     selectedDatabase
+  );
+
+  await SingletonConnection.connect();
+
+  return (await SingletonConnection.instance.query(sql))[0];
+}
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} selectedDatabase 
+ * @returns {Promise<import("../lib/dashboard-utilities.js").TableIdentifier[]>}
+ */
+async function getTableIdentifiers(selectedDatabase) {
+  const sql = format(`
+    SELECT 
+      tabla.nombre_externo AS externalName,
+      tabla.nombre_interno AS internalName
+    FROM tabla 
+    WHERE tabla.base_de_datos = ?
+    ORDER BY tabla.nombre_externo
+    `,
+    selectedDatabase.id
   );
 
   await SingletonConnection.connect();
@@ -299,6 +346,18 @@ async function createTable(externalTableName, selectedDatabase, tableScheme) {
   }
 }
 
+async function deleteTable(selectedDatabase, selectedTable) {
+  const databaseId = await getDatabaseId(selectedDatabase);
+
+  await SingletonConnection.connect();
+  const sql = format(`
+    DELETE FROM tabla WHERE tabla.base_de_datos = ? AND tabla.nombre_externo = ?
+    `,
+    [ databaseId, selectedTable ]
+  );
+  await SingletonConnection.instance.execute(sql);
+}
+
 module.exports = {
   getDatabases,
   getDatabaseId,
@@ -307,7 +366,9 @@ module.exports = {
   getTables,
   getTablesWithBothNames,
   getIndexedTablesWithBothNames,
+  getTableIdentifiers,
+  getDatabaseIdentifiers,
   tableExists,
   createTable,
-  deleteTable
+  deleteTable,
 }

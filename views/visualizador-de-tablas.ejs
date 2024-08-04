@@ -1,0 +1,20 @@
+<h1>
+    <%- dashboardPayload.currentDatabase.name %>
+</h1>
+
+<div class="dashboard__card-container">
+    <a href="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" class="dashboard__table-card dashboard__table-card--new-card">
+        <span class="dashboard__table-card__name">
+            Crear tabla
+        </span>
+    </a>
+    <%
+        for (let table of dashboardPayload.currentTables) {
+    %>
+        <a class="dashboard__table-card" href="/databases/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(table) %>">
+            <%= table.externalName %>
+        </a>
+    <%
+    }
+    %>
+</div>
