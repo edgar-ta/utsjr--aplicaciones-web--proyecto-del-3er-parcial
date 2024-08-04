@@ -44,6 +44,11 @@ section{
     color: white;
 }
 
+input[data-disabled] {
+    pointer-events: none;
+    opacity: 0.15;
+}
+
 tbody tr:nth-child(odd){
     background-color: orange;
     color: white;
