@@ -4,7 +4,7 @@
         <template data-id="column-referenced-table-form-template">
             <div data-id="column-referenced-table-form">
                 <h1>Tabla referenciada</h1>
-                <select name="referencedTablesArray" required data-id="column-referenced-table-select">
+                <select name="referencedTableArray" required data-id="column-referenced-table-select">
                     <% for (let i = 0; i < tablas.length; i++) { 
                         const tabla = tablas[i];
                         %>
@@ -15,7 +15,7 @@
         </template>
 
         <template data-id="column-template">
-            <tr>
+            <tr data-id="column">
                 <td data-id="column-index-cell">#</td>
                 <td>
                     <input type="text" name="nameArray" required data-id="column-name" value="">
@@ -42,15 +42,19 @@
                     </select>
                 </td>
                 <td>
+                    <input type="hidden" name="isPrimaryKeyArray" value="none">
                     <input type="radio" name="isPrimaryKeyArray" data-disabled-count="0" required data-id="column-is-primary-key">
                 </td>
                 <td>
+                    <input type="hidden" name="isNullableArray" value="none">
                     <input type="checkbox" name="isNullableArray" data-disabled-count="0" data-id="column-is-nullable">
                 </td>
                 <td>
+                    <input type="hidden" name="isUniqueArray" value="none">
                     <input type="checkbox" name="isUniqueArray" data-disabled-count="0" data-id="column-is-unique">
                 </td>
                 <td>
+                    <input type="hidden" name="isAutoincrementableArray" value="none">
                     <input type="checkbox" name="isAutoincrementableArray" data-disabled-count="0" data-id="column-is-autoincrementable">
                 </td>
             </tr>

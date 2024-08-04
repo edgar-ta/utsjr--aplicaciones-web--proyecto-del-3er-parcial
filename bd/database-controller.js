@@ -2,7 +2,54 @@ const { format } = require("mysql2");
 const SingletonConnection = require("./singleton-connection");
 
 /**
- * @typedef {Object} ColumnDescriptor 
+ * @typedef {"integer" | "decimal" | "date" | "text" | "reference" } ExternalColumnType
+ * 
+ */
+
+/**
+ * @typedef { "int" | "float" | "date" | "text" } MidwayColumnType
+ */
+
+
+/**
+ * @typedef {Object} IncomingColumnDescriptor
+* @property {number} index
+* @property {string} name
+* @property {ExternalColumnType} dataType
+* @property {string?} referencedTableId
+* @property {boolean} isPrimaryKey
+* @property {boolean} isNullable
+* @property {boolean} isUnique
+* @property {boolean} isAutoincrementable
+*/
+
+
+/**
+ * @typedef {Object} MidwayPrimitiveColumnDescriptor
+ * @property {number} index
+ * @property {string} name
+ * @property {MidwayColumnType} dataType
+ * @property {boolean} isPrimaryKey
+ * @property {boolean} isNullable
+ * @property {boolean} isUnique
+ * @property {boolean} isAutoincrementable
+ * 
+ */
+
+/**
+ * @typedef {Object} MidwayReferenceColumnDescriptorProperties
+ * @property {string} referencedTableId
+ * @property {string} referencedTableColumn
+ * @typedef {MidwayPrimitiveColumnDescriptor & MidwayReferenceColumnDescriptorProperties} MidwayReferenceColumnDescriptor
+ */
+
+/**
+ * @typedef {MidwayPrimitiveColumnDescriptor | MidwayReferenceColumnDescriptor} MidwayColumnDescriptor
+ * 
+ */
+
+/**
+ * @typedef {Object} OutgoingColumnDescriptor_ 
  * @property {string} nombreDeColumna
  * @property {"int" | "double" | "date" | "varchar"} tipoDeDato
  * @property {"PRI" | "UNI" | "MUL" | "" } tipoDeclave
@@ -16,12 +63,27 @@ const SingletonConnection = require("./singleton-connection");
  */
  async function getDatabases() {
   const sql = "SELECT nombre FROM base_de_datos;";
-  SingletonConnection.connect();
+  await SingletonConnection.connect();
 
   let [ databases ] = await SingletonConnection.instance.query(sql);
   databases = databases.map(object => object.nombre)
 
   return databases;
+}
+
+/**
+ * 
+ * @param {string} selectedDatabase 
+ * @returns {Promise<number>}
+ */
+async function getDatabaseId(selectedDatabase) {
+  const sql = format("SELECT base_de_datos.id AS id FROM base_de_datos WHERE base_de_datos.nombre = ?", selectedDatabase);
+  SingletonConnection.connect();
+
+  let [ [ { id } ]  ] = await SingletonConnection.instance.query(sql);
+
+  return id;
+
 }
 
 /**
@@ -126,7 +188,7 @@ async function getIndexedTablesWithBothNames(selectedDatabase) {
 /**
  * 
  * @param {string} selectedTable 
- * @returns {Promise<ColumnDescriptor[]>}
+ * @returns {Promise<OutgoingColumnDescriptor_[]>}
  */
  async function getSchema(selectedTable) {
   const sql = format(`
@@ -151,12 +213,71 @@ async function getIndexedTablesWithBothNames(selectedDatabase) {
   return schema;
 }
 
+/**
+ * 
+ * @param {string} internalTableName 
+ * @returns {Promise<boolean>}
+ */
+async function tableExists(internalTableName) {
+  const sql = format(`
+    SELECT COUNT(*) AS count
+    FROM tabla 
+    WHERE tabla.nombre_interno = ?
+    `,
+    internalTableName
+  );
+  await SingletonConnection.connect();
+
+  let [ [ { count } ] ] = await SingletonConnection.instance.execute(sql);
+
+  return count > 0;
+}
+
+/**
+ * 
+ * @param {IncomingColumnDescriptor} columnObject 
+ * @returns {Promise<MidwayReferenceColumnDescriptor>}
+ */
+async function getMidwayReferenceDescriptor(columnObject) {
+  const sql = format(`
+    SELECT 
+        information_schema.columns.DATA_TYPE AS dataType, 
+        information_schema.columns.COLUMN_NAME as referencedTableColumn
+    FROM information_schema.columns 
+    WHERE 
+      information_schema.columns.TABLE_NAME = ? AND 
+      information_schema.columns.COLUMN_KEY = 'PRI'
+    ;
+    `, columnObject.referencedTableId
+  );
+
+  await SingletonConnection.connect();
+
+  const [ [ { dataType, referencedTableColumn } ] ] = await SingletonConnection.instance.execute(sql);
+
+  const { index, isAutoincrementable, isNullable, isPrimaryKey, isUnique, name, referencedTableId } = columnObject;
+
+  return {
+    index,
+    dataType,
+    isAutoincrementable,
+    isNullable,
+    isPrimaryKey,
+    isUnique,
+    name,
+    referencedTableColumn,
+    referencedTableId
+  };
+}
 
 module.exports = {
   getDatabases,
+  getDatabaseId,
   getRegistries,
   getSchema,
   getTables,
   getTablesWithBothNames,
-  getIndexedTablesWithBothNames
+  getIndexedTablesWithBothNames,
+  getMidwayReferenceDescriptor,
+  tableExists
 }

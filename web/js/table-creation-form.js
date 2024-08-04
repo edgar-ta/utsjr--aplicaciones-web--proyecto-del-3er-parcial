@@ -137,21 +137,35 @@ function getDisabledCountOf(checkbox) {
     return Number.parseInt(count);
 }
 
-function lockFakeStateOf(checkbox, fakeState) {
+function setDisabledCountOf(checkbox, callback) {
+    const previousDisabledCount = getDisabledCountOf(checkbox);
+    checkbox.setAttribute("data-disabled-count", callback(previousDisabledCount));
+}
+
+function lockFakeStateOf(checkbox, fakeState, increaseDisabledCount = true) {
     const count = getDisabledCountOf(checkbox);
     if (count == 0) {
-        checkbox.setAttribute("disabled", "true");
+        checkbox.setAttribute("data-disabled", "true");
         checkbox.setAttribute("data-previous-state", checkbox.checked? "checked": "unchecked");
+
+        if (increaseDisabledCount) {
+            setDisabledCountOf(checkbox, (value) => value + 1);
+        }
+
         checkbox.checked = fakeState;
     }
 }
 
-function unlockFakeStateOf(checkbox) {
+function unlockFakeStateOf(checkbox, decreaseDisabledCount = true) {
+    if (decreaseDisabledCount) {
+        setDisabledCountOf(checkbox, (value) => Math.max(value - 1, 0));
+    }
+
     if (getDisabledCountOf(checkbox) == 0) {
         const previousState = checkbox.getAttribute("data-previous-state");
 
         checkbox.removeAttribute("data-previous-state");
-        checkbox.removeAttribute("disabled");
+        checkbox.removeAttribute("data-disabled");
         if (previousState !== null) {
             checkbox.checked = previousState == "checked";
         }
@@ -182,7 +196,7 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
         const value = input.value;
 
         if (predicate(value)) {
-            lockFakeStateOf(checkbox);
+            lockFakeStateOf(checkbox, false, false);
 
             if (!addedToQueue) {
                 checkbox.setAttribute("data-disabled-count", getDisabledCount() + 1);
@@ -194,7 +208,7 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
                 addedToQueue = false;
             }
 
-            unlockFakeStateOf(checkbox);
+            unlockFakeStateOf(checkbox, false);
         }
     });
 };
@@ -202,14 +216,3 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
 columnCountInput.addEventListener("input", (event) => updateTableColumnInputs());
 updateTableColumnInputs();
 
-// tableCreationForm.addEventListener("submit", (event) => {
-//     event.preventDefault();
-
-//     /** @type {NodeListOf<HTMLInputElement>} */
-//     const columnNames = tableCreationForm.querySelectorAll("[data-id='column-name']");
-//     columnNames.forEach(columnName => {
-//         // if (!columnName.checkValidity()) {
-//         //     columnName.setCustomValidity("Ingresa el nombre de la columna");
-//         // }
-//     });
-// });
