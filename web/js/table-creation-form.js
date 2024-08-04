@@ -132,12 +132,16 @@ function setupTypeSelectFunctionality(row) {
 }
 
 function getDisabledCountOf(checkbox) {
-    return Number.parseInt(checkbox.getAttribute("data-disabled-count"));
+    const count = checkbox.getAttribute("data-disabled-count");
+    if (count === null) return 0;
+    return Number.parseInt(count);
 }
 
 function lockFakeStateOf(checkbox, fakeState) {
-    if (getDisabledCountOf(checkbox) == 0) {
+    const count = getDisabledCountOf(checkbox);
+    if (count == 0) {
         checkbox.setAttribute("disabled", "true");
+        checkbox.setAttribute("data-previous-state", checkbox.checked? "checked": "unchecked");
         checkbox.checked = fakeState;
     }
 }
@@ -148,7 +152,9 @@ function unlockFakeStateOf(checkbox) {
 
         checkbox.removeAttribute("data-previous-state");
         checkbox.removeAttribute("disabled");
-        checkbox.checked = previousState == "checked";
+        if (previousState !== null) {
+            checkbox.checked = previousState == "checked";
+        }
     }
 }
 
