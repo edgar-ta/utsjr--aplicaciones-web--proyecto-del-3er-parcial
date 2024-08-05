@@ -489,16 +489,21 @@ async function createTable(externalTableName, databaseIdentifier, tableScheme) {
   }
 }
 
-async function deleteTable(selectedDatabase, selectedTable) {
-  const databaseId = await getDatabaseId(selectedDatabase);
-
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ */
+async function deleteTable(databaseIdentifier, tableIdentifier) {
   await SingletonConnection.connect();
-  const sql = format(`
-    DELETE FROM tabla WHERE tabla.base_de_datos = ? AND tabla.nombre_externo = ?
-    `,
-    [ databaseId, selectedTable ]
+
+  const tableDeletionSql = format(`DROP TABLE ??`, [tableIdentifier.internalName]);
+  await SingletonConnection.instance.execute(tableDeletionSql);
+
+  const recordDeletionSql = format(`DELETE FROM tabla WHERE tabla.base_de_datos = ? AND tabla.nombre_interno = ?`,
+    [ databaseIdentifier.id, tableIdentifier.internalName ]
   );
-  await SingletonConnection.instance.execute(sql);
+  await SingletonConnection.instance.execute(recordDeletionSql);
 }
 
 module.exports = {

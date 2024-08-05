@@ -156,15 +156,15 @@ ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, r
 });
 
 ruta.get("/delete/:selectedDatabase/:selectedTable", async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
     try {
-        const selectedDatabase = request.params.selectedDatabase;
-        const selectedTable = request.params.selectedTable;
 
-        await DatabaseController.deleteTable(selectedDatabase, selectedTable);
+        await DatabaseController.deleteTable(databaseIdentifier, tableIdentifier);
 
-        response.redirect(`/databases/${selectedDatabase}`);
+        response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}`);
     } catch (error) {
-        console.log(error);
+        response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
         next(error);
     }
 });
