@@ -431,7 +431,7 @@ async function databaseExistsWithId(databaseId) {
  * 
  * @param {string} internalTableName 
  */
-async function deleteTable(internalTableName) {
+async function deleteTableWithInternalName(internalTableName) {
   const sql = format(
     `DELETE FROM tabla WHERE tabla.nombre_interno = ?`, 
     [internalTableName]
@@ -484,7 +484,7 @@ async function createTable(externalTableName, databaseIdentifier, tableScheme) {
     await SingletonConnection.instance.execute(tableCreationSql);
 
   } catch (error) {
-    await deleteTable(internalTableName);
+    await deleteTableWithInternalName(internalTableName);
     throw error;
   }
 }
