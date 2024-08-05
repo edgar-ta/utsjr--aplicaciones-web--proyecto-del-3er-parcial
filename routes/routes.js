@@ -117,7 +117,10 @@ ruta.get("/new/:selectedDatabase/table", async (request, response, next) => {
 
 ruta.get("/new/database", async (request, response, next) => {
     try {
-        
+        await DatabaseController.createDatabase().then((insertionId) => {
+            console.log(`The insertion id was: ${insertionId}`);
+            response.redirect(`/databases/${insertionId}`);
+        });
     } catch (error) {
         console.log(error);
         next(error);
@@ -164,7 +167,23 @@ ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, r
     }
 });
 
-ruta.get("/delete/:selectedDatabase/:selectedTable", async (request, response, next) => {
+ruta.get("/delete/:selectedDatabase", ensureValidDatabase, async (request, response, next) => {
+    try {
+        const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+        await DatabaseController
+            .deleteDatabase(databaseIdentifier.id)
+            .then((results) => {
+                console.log(results);
+                console.log(`The database ${databaseIdentifier.name} was deleted correctly`);
+                response.redirect("/databases");
+            })
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/delete/:selectedDatabase/:selectedTable", ensureValidDatabase, ensureValidTable, async (request, response, next) => {
     const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
     const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
     try {
@@ -174,6 +193,26 @@ ruta.get("/delete/:selectedDatabase/:selectedTable", async (request, response, n
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}`);
     } catch (error) {
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+        next(error);
+    }
+});
+
+ruta.get("/rename/database", async (request, response, next) => {
+    const databaseId = request.query.databaseId;
+    const name = request.query.name;
+
+    try {
+        DatabaseController
+            .renameDatabase(databaseId, name)
+            .then(() => {
+                response.send({ ok: true, error: null });
+            })
+            .catch((error) => {
+                response.send({ ok: false, error });
+            })
+            ;
+    } catch (error) {
+        console.log(error);
         next(error);
     }
 });

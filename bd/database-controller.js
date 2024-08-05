@@ -443,6 +443,56 @@ async function deleteTable(internalTableName) {
 }
 
 /**
+ * @returns {Promise<number>}
+ */
+async function createDatabase() {
+  await SingletonConnection.connect();
+  return SingletonConnection.instance
+    .execute("SELECT MAX(base_de_datos.id) AS lastId FROM base_de_datos")
+    .then((results) => {
+      const [ [ { lastId } ] ] = results;
+      const name = `Base de datos número ${lastId}`;
+      const sql = format("INSERT INTO base_de_datos VALUES (NULL, ?)", [name]);
+      return SingletonConnection.instance.execute(sql);
+    })
+    .then(([ { insertId } ]) => insertId);
+  ;
+}
+
+/**
+ * @param {number} databaseId 
+ * @returns {Promise<Response>}
+ */
+async function deleteDatabase(databaseId) {
+  await SingletonConnection.connect();
+  const sql = format("SELECT tabla.nombre_interno AS internalName, tabla.id AS id FROM tabla WHERE tabla.base_de_datos = ?", [ databaseId ]);
+  return SingletonConnection.instance.execute(sql).then(([ records ]) => {
+    return Promise.all(records.map(async ({ internalName, id }) => {
+      const dropSql = format(`DROP TABLE ??`, [ internalName ]);
+      const deleteSql = format(`DELETE FROM tabla WHERE tabla.id = ?`, [id]);
+      return SingletonConnection.instance.execute(dropSql).then(() => SingletonConnection.instance.execute(deleteSql));
+    }));
+  })
+  .then(() => {
+    const sql = format("DELETE FROM base_de_datos WHERE base_de_datos.id = ?", [ databaseId ]);
+    return SingletonConnection.instance.execute(sql);
+  })
+  ;
+}
+
+/**
+ * 
+ * @param {string} databaseId 
+ * @param {string} name 
+ * @returns {Promise<Response>}
+ */
+async function renameDatabase(databaseId, name) {
+  const sql = format(`UPDATE base_de_datos SET base_de_datos.nombre = ? WHERE base_de_datos.id = ?`, [ name, databaseId ]);
+  await SingletonConnection.connect();
+  return SingletonConnection.instance.execute(sql);
+}
+
+/**
  * 
  * @param {string} externalTableName 
  * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
@@ -519,6 +569,9 @@ module.exports = {
   getDatabaseIdentifiers,
   tableExists,
   createTable,
+  createDatabase,
   deleteTable,
+  deleteDatabase,
   databaseExistsWithId,
+  renameDatabase,
 }

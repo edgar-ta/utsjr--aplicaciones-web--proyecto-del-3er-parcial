@@ -9,7 +9,7 @@
         250ms ease-in-out border-bottom-color,
         250ms ease-in-out border-bottom-width
         ;
-    font-family: 'Open Sans';
+    font-family: 'Inter';
     font-weight: bolder;
 }
 
@@ -24,3 +24,19 @@
     gap: 1rem;
 }
 
+.visualizador-de-tablas__delete-button {
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+    background-color: rgb(121, 9, 9);
+    width: fit-content;
+    text-decoration: none;
+    color: white;
+    font-family: 'Inter';
+    font-size: 0.75rem;
+    border-radius: 3px;
+    transition: 250ms ease-in-out background-color;
+}
+
+.visualizador-de-tablas__delete-button:hover {
+    background-color: rgb(196, 0, 0);
+}

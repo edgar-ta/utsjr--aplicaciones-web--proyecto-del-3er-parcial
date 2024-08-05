@@ -1,7 +1,8 @@
 <link rel="stylesheet" href="/web/css/visualizador-de-tablas.css">
 
-<div class="visualizador-de-tablas__container">
-    <input type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador-de-tablas__header-input">
+<div class="visualizador-de-tablas__container" data-database-id="<%- dashboardPayload.currentDatabase.id %>">
+    <input data-id="database-name-input" type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador-de-tablas__header-input" placeholder="Ingresa el nombre de tu BD">
+    <a class="visualizador-de-tablas__delete-button" href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>">Eliminar base de datos</a>
 
     <div class="dashboard__card-container">
         <a href="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" class="dashboard__table-card dashboard__table-card--new-card">
@@ -28,3 +29,5 @@
         %>
     </div>
 </div>
+
+<script src="/web/js/database-edition.js"></script>
