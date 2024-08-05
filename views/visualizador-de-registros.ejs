@@ -1,64 +1,56 @@
 <h1>
-    <%- informacionDeRegistros.tablaSeleccionada %>
+    <%- recordVisualizationPayload.currentTable.externalName %>
 </h1>
-<a href="/delete/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- informacionDeRegistros.tablaSeleccionada %>">Eliminar tabla</a>
+<a href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
 <table>
     <thead>
         <tr>
             <% 
-            for (let columna of informacionDeRegistros.esquema) {
+            for (let columnObject of recordVisualizationPayload.schema) {
                 %> 
                 <th>
                     <div style="display: flex; flex-direction: column;">
                         <div>
                             <label for="">Nombre</label>
-                            <input type="text" name="" id="" value="<%- columna.nombreDeColumna %>">
+                            <p>
+                                <%- columnObject.name %>
+                            </p>
                         </div>
                         <div>
-                            <label for="">
-                                Tipo de dato
-                            </label>
-                            <select name="" id="">
-                                <option value="int" <% if (columna.tipoDeDato == "int") { %> selected="selected" <% } %> >
-                                    Entero
-                                </option>
-                                <option value="double" <% if (columna.tipoDeDato == "double") { %> selected="selected" <% } %> >
-                                    Decimal
-                                </option>
-                                <option value="date" <% if (columna.tipoDeDato == "date") { %> selected="selected" <% } %> >
-                                    Fecha
-                                </option>
-                                <option value="text" <% if (columna.tipoDeDato == "text") { %> selected="selected" <% } %> >
-                                    Texto
-                                </option>
-                            </select>
+                            <label for="">Tipo de dato</label>
+                            <p>
+                                <%- columnObject.dataType %>
+                            </p>
                         </div>
                         <div>
-                            <label for="">
-                                Tipo de clave
-                            </label>
-                            <select name="" id="">
-                                <option value="" <% if (columna.tipoDeClave == "") { %> selected="selected" <% } %> >
-                                    Ninguna
-                                </option>
-                                <option value="PRI" <% if (columna.tipoDeClave == "PRI") { %> selected="selected" <% } %> >
-                                    Clave primaria
-                                </option>
-                                <option value="UNI" <% if (columna.tipoDeClave == "UNI") { %> selected="selected" <% } %> >
-                                    Clave candidata
-                                </option>
-                                <option value="MUL" <% if (columna.tipoDeClave == "MUL") { %> selected="selected" <% } %> >
-                                    Clave repetida
-                                </option>
-                            </select>
+                            <label for="">Es clave primaria</label>
+                            <p>
+                                <%- columnObject.isPrimaryKey %>
+                            </p>
                         </div>
                         <div>
-                            <label for="">Es nulo</label>
-                            <input type="checkbox" <% if (columna.esNulo == 1) { %> checked <% } %>>
+                            <label for="">Es único</label>
+                            <p>
+                                <%- columnObject.isUnique %>
+                            </p>
                         </div>
                         <div>
                             <label for="">Es autoincrementable</label>
-                            <input type="checkbox" <% if (columna.esAutoincrementable == 1) { %> checked <% } %>>
+                            <p>
+                                <%- columnObject.isAutoincrementable %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es nulo</label>
+                            <p>
+                                <%- columnObject.isNullable %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es clave foránea</label>
+                            <p>
+                                <%- columnObject.isForeignKey %>
+                            </p>
                         </div>
                     </div>
                 </th>
@@ -69,63 +61,15 @@
         </tr>
     </thead>
     <tbody>
-        <%
-        for (let registro of informacionDeRegistros.registros) {
-            %>
-            
+        <% for (let record of recordVisualizationPayload.records) { %>
             <tr>
-                <% 
-                for (let columna of informacionDeRegistros.esquema) {
-                    const valorActual = registro[columna.nombreDeColumna];
-                    %>
-
+                <% for (let columnObject of recordVisualizationPayload.schema) { %>
                     <td>
-                    <%
-                    switch (columna.tipoDeDato) {
-                        case "int":
-                            %>
-
-                            <input type="number" value="<%- valorActual %>">
-
-                            <%
-                            break;
-                        
-                        case "double":
-                            %>
-                            
-                            <input type="number" step="0.01" value="<%- valorActual %>">
-
-                            <%
-                            break;
-
-
-                        case "date":
-                            %>
-
-                            <input type="date" value="<%- valorActual %>">
-
-                            <%
-                            break;
-
-                        case "text":
-                            %>
-
-                            <input type="text" value="<%- valorActual %>">
-
-                            <%
-                            break;
-                    }
-                    %>
+                        <%- record[columnObject.name] %>
                     </td>
-                    <%
-                }
-
-                %>
+                <% } %>
             </tr>
-
-            <%
-        }
-        %>
+        <% } %>
     </tbody>
 </table>
 

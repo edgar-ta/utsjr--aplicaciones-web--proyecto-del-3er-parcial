@@ -1,10 +1,10 @@
 <%- include("./templates/long-header.ejs"); %>
         <% 
-        if (dashboardPayload.currentTables !== null) { 
+        if (dashboardMode === "tables") { 
         %>
             <%- include("./visualizador-de-tablas") %>
         <%
-        } else if (typeof informacionDeRegistros != "undefined") {
+        } else if (dashboardMode === "records") {
         %>
             <%- include("./visualizador-de-registros"); %>
         <%
