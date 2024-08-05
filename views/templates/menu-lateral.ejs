@@ -3,43 +3,38 @@
 <div class="sidebar__panel" data-id="sidebar" data-state="open">
     <ul>
         <h1>Bases de Datos</h1>
-        <% 
-        for (let baseDeDatos of basesDeDatos) {
-        %>
-            <li>
-                <a href="/databases/<%- baseDeDatos %>">
-                    <%- baseDeDatos %>
-                </a>
-            
-                <%
-                    if (
-                        typeof informacionDeRegistros != "undefined" && 
-                        typeof informacionDeTablas != "undefined" && 
-                        informacionDeTablas.baseDeDatosSeleccionada == baseDeDatos
-                    ) {
-                %>
-                        
-                            <ul>
-                                <% 
-                                for (let tabla of informacionDeTablas.tablas) {
-                                %>
-                                    <li> 
-                                        <a href="/databases/<%- baseDeDatos %>/<%- tabla %>">
-                                            <%- tabla %>
-                                        </a>
-                                    </li>
-                                <%
-                                }
-                                %>
-                            </ul>
-                        
-                <%
-                    }
-                %>
-            </li>
-        <%
-        }
-        %>
+            <% 
+            for (let database of dashboardPayload.databases) {
+            %>
+                <li>
+                    <a href="/databases/<%- getUrlForDatabase(database) %>">
+                        <%- database.name %>
+                    </a>
+                
+                    <%
+                        if (dashboardPayload.currentDatabase !== null && dashboardPayload.currentDatabase.id === database.id) {
+                    %>
+                            
+                        <ul>
+                            <% 
+                            for (let table of dashboardPayload.currentTables) {
+                            %>
+                                <li> 
+                                    <a href="/databases/<%- getUrlForDatabase(database) %>/<%- getUrlForTable(table) %>">
+                                        <%- table.externalName %>
+                                    </a>
+                                </li>
+                            <%
+                            }
+                            %>
+                        </ul>
+                    <%
+                        }
+                    %>
+                </li>
+            <%
+            }
+            %>
     </ul>
 </div>
 

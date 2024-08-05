@@ -1,0 +1,75 @@
+<h1>
+    <%- recordVisualizationPayload.currentTable.externalName %>
+</h1>
+<a href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
+<table>
+    <thead>
+        <tr>
+            <% 
+            for (let columnObject of recordVisualizationPayload.schema) {
+                %> 
+                <th>
+                    <div style="display: flex; flex-direction: column;">
+                        <div>
+                            <label for="">Nombre</label>
+                            <p>
+                                <%- columnObject.name %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Tipo de dato</label>
+                            <p>
+                                <%- columnObject.dataType %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es clave primaria</label>
+                            <p>
+                                <%- columnObject.isPrimaryKey %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es único</label>
+                            <p>
+                                <%- columnObject.isUnique %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es autoincrementable</label>
+                            <p>
+                                <%- columnObject.isAutoincrementable %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es nulo</label>
+                            <p>
+                                <%- columnObject.isNullable %>
+                            </p>
+                        </div>
+                        <div>
+                            <label for="">Es clave foránea</label>
+                            <p>
+                                <%- columnObject.isForeignKey %>
+                            </p>
+                        </div>
+                    </div>
+                </th>
+            <%
+            }
+                
+            %>
+        </tr>
+    </thead>
+    <tbody>
+        <% for (let record of recordVisualizationPayload.records) { %>
+            <tr>
+                <% for (let columnObject of recordVisualizationPayload.schema) { %>
+                    <td>
+                        <%- record[columnObject.name] %>
+                    </td>
+                <% } %>
+            </tr>
+        <% } %>
+    </tbody>
+</table>
+

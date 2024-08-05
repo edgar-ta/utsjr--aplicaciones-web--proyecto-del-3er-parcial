@@ -1,5 +1,9 @@
 const { format } = require("mysql2");
-const SingletonConnection = require("./singleton-connection");
+const { v4: uuidv4 } = require("uuid");
+
+const SingletonConnection = require("./singleton-connection.js");
+const TableCreationUtilities = require("../lib/table-creation-utilities.js");
+const convertToKebabCase = require("../lib/single-function-files/convert-to-kebab-case.js");
 
 /**
  * @typedef {"integer" | "decimal" | "date" | "text" | "reference" } ExternalColumnType
@@ -49,6 +53,30 @@ const SingletonConnection = require("./singleton-connection");
  */
 
 /**
+ * @typedef {Object} OutgoingPrimitiveColumnDescriptor
+ * @property {number} index
+ * @property {string} name
+ * @property {ExternalColumnType} dataType
+ * @property {boolean} isPrimaryKey
+ * @property {boolean} isNullable
+ * @property {boolean} isUnique
+ * @property {boolean} isAutoincrementable
+ * @property {boolean} isForeignKey
+ * 
+ */
+
+/**
+ * @typedef {Object} OutgoingReferenceColumnDescriptorProperties
+ * @property {import("../lib/dashboard-utilities.js").TableIdentifier} referencedTable
+ * @property {import("../lib/dashboard-utilities.js").RecordIdentifier[]} validValues
+ * @typedef {OutgoingPrimitiveColumnDescriptor & OutgoingReferenceColumnDescriptorProperties} OutgoingReferenceColumnDescriptor
+ */
+
+/**
+ * @typedef {OutgoingPrimitiveColumnDescriptor | OutgoingReferenceColumnDescriptor} OutgoingColumnDescriptor
+ */
+
+/**
  * @typedef {Object} OutgoingColumnDescriptor_ 
  * @property {string} nombreDeColumna
  * @property {"int" | "double" | "date" | "varchar"} tipoDeDato
@@ -78,12 +106,36 @@ const SingletonConnection = require("./singleton-connection");
  */
 async function getDatabaseId(selectedDatabase) {
   const sql = format("SELECT base_de_datos.id AS id FROM base_de_datos WHERE base_de_datos.nombre = ?", selectedDatabase);
-  SingletonConnection.connect();
+  await SingletonConnection.connect();
 
   let [ [ { id } ]  ] = await SingletonConnection.instance.query(sql);
 
   return id;
 
+}
+
+
+/**
+ * 
+ * @param {number} selectedDatabase 
+ * @returns {import("../lib/dashboard-utilities.js").DatabaseIdentifier[]}
+ */
+async function getDatabaseIdentifiers() {
+  await SingletonConnection.connect();
+  const sql = format(`SELECT base_de_datos.nombre AS name, base_de_datos.id AS id FROM base_de_datos`);
+
+  /** @type {{ name: string, id: string }[][]} */
+  const [ rawData ] = await SingletonConnection.instance.execute(sql);
+
+  return rawData.map(datum => {
+    const kebabCaseName = convertToKebabCase(datum.name);
+    const id = Number.parseInt(datum.id);
+    return {
+      name: datum.name,
+      kebabCaseName,
+      id
+    }
+  });
 }
 
 /**
@@ -134,6 +186,52 @@ async function getTablesWithBothNames(selectedDatabase) {
 }
 
 /**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} selectedDatabase 
+ * @returns {Promise<import("../lib/dashboard-utilities.js").TableIdentifier[]>}
+ */
+async function getTableIdentifiers(selectedDatabase) {
+  const sql = format(`
+    SELECT 
+      tabla.nombre_externo AS externalName,
+      tabla.nombre_interno AS internalName
+    FROM tabla 
+    WHERE tabla.base_de_datos = ?
+    ORDER BY tabla.nombre_externo
+    `,
+    selectedDatabase.id
+  );
+
+  await SingletonConnection.connect();
+
+  return (await SingletonConnection.instance.query(sql))[0];
+}
+
+
+/**
+ * 
+ * @param {string} tableInternalName 
+ * @returns {Promise<import("../lib/dashboard-utilities.js").TableIdentifier>}
+ */
+async function getTableIdentifier(tableInternalName) {
+  const sql = format(`
+    SELECT 
+      tabla.nombre_externo AS externalName,
+      tabla.nombre_interno AS internalName
+    FROM tabla 
+    WHERE tabla.nombre_interno = ?
+    `,
+    [tableInternalName]
+  );
+
+  await SingletonConnection.connect();
+  const [ [ tableIdentifier ] ] = await SingletonConnection.instance.query(sql);
+
+  return tableIdentifier;
+
+}
+
+/**
  * Gets both the internal and external names of the tables
  * in the given database that have a primary key; the query
  * works under the assumption that every table has at most
@@ -169,48 +267,124 @@ async function getIndexedTablesWithBothNames(selectedDatabase) {
 
 /**
  * 
- * @param {string} selectedTable 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} internalTableName 
  * @returns {Promise<Object[]>}
  */
- async function getRegistries(selectedTable) {
-  const tableNameStatement = format(`SELECT nombre_interno AS nombreDeTabla FROM tabla WHERE nombre_externo = ?`, selectedTable);
+ async function getRecords(internalTableName) {
+  const registriesStatement = format(`SELECT * FROM ??`, [internalTableName]);
 
-  await SingletonConnection.connect();
+  const [ records ] = await SingletonConnection.instance.query(registriesStatement);
 
-  const [ [ { nombreDeTabla: tableName } ] ] = await SingletonConnection.instance.query(tableNameStatement);
-  const registriesStatement = `SELECT * FROM \`${tableName}\``; // código potencialmente peligroso xd
-
-  const [ registros ] = await SingletonConnection.instance.query(registriesStatement);
-
-  return registros;
+  return records;
 }
 
 /**
  * 
- * @param {string} selectedTable 
- * @returns {Promise<OutgoingColumnDescriptor_[]>}
+ * @param {string} tableInternalName 
+ * @returns {Promise<OutgoingColumnDescriptor[]>}
  */
- async function getSchema(selectedTable) {
+ async function getSchema(tableInternalName) {
+  // /** @type {OutgoingColumnDescriptor} */
+  // const something = {};
+  // something.;
+
   const sql = format(`
     SELECT 
-        information_schema.columns.COLUMN_NAME AS nombreDeColumna, 
-        information_schema.columns.DATA_TYPE AS tipoDeDato, 
-        information_schema.columns.COLUMN_KEY AS tipoDeClave,
-        information_schema.columns.EXTRA = "auto_increment" AS esAutoincrementable,
-        information_schema.columns.IS_NULLABLE = "YES" AS esNulo
+      information_schema.columns.COLUMN_NAME AS name, 
+      information_schema.columns.DATA_TYPE AS dataType, 
+      information_schema.columns.COLUMN_KEY = "PRI" AS isPrimaryKey,
+      information_schema.columns.COLUMN_key = "UNI" as isUnique,
+      information_schema.columns.EXTRA = "auto_increment" AS isAutoincrementable,
+      information_schema.columns.IS_NULLABLE = "YES" AS isNullable,
+        information_schema.columns.COLUMN_NAME IN (
+        SELECT DISTINCT (information_schema.key_column_usage.column_name)
+        FROM information_schema.key_column_usage
+        INNER JOIN information_schema.table_constraints
+        ON information_schema.key_column_usage.constraint_name = information_schema.table_constraints.constraint_name
+        WHERE 
+          information_schema.key_column_usage.table_name = ? AND 
+          information_schema.table_constraints.constraint_type = "FOREIGN KEY"
+      ) AS isForeignKey
     FROM information_schema.columns
-    INNER JOIN tabla ON tabla.nombre_interno = information_schema.columns.TABLE_NAME
-    WHERE tabla.nombre_externo = ?
-    ORDER BY ORDINAL_POSITION ASC
-    ;
-    `, selectedTable
+    WHERE information_schema.columns.TABLE_NAME = ?
+    ORDER BY ORDINAL_POSITION ASC;
+    `, [tableInternalName, tableInternalName]
   );
 
   await SingletonConnection.connect();
 
+  /** @type {{name: string, dataType: string, isPrimaryKey: number, isUnique: number, isAutoincrementable: number, isNullable: number, isForeignKey: number}[][]} */
   let [ schema ] = await SingletonConnection.instance.execute(sql);
 
-  return schema;
+  let indexedSchema = schema.map(({ name, dataType, isPrimaryKey, isUnique, isAutoincrementable, isNullable, isForeignKey }, index) => {
+    const coalescedDataType = TableCreationUtilities.coalesceSqlToColumnType(dataType);
+    const [ booleanIsPrimaryKey, booleanIsUnique, booleanIsAutoincrementable, booleanIsNullable, booleanIsForeignKey ]
+      = [ isPrimaryKey, isUnique, isAutoincrementable, isNullable, isForeignKey ].map(value => value == 1? true: false);
+    return {
+      index,
+      name,
+      dataType: coalescedDataType,
+      isPrimaryKey: booleanIsPrimaryKey,
+      isUnique: booleanIsUnique,
+      isAutoincrementable: booleanIsAutoincrementable,
+      isNullable: booleanIsNullable,
+      isForeignKey: booleanIsForeignKey,
+    }
+  });
+
+  /** @type {OutgoingColumnDescriptor[]} */
+  const primitiveColumns = indexedSchema.filter(columnObject => !columnObject.isForeignKey);
+  /** @type {OutgoingColumnDescriptor[]} */
+  const referenceColumns = indexedSchema.filter(columnObject =>  columnObject.isForeignKey);
+
+  /** @type {OutgoingColumnDescriptor[]} */
+  const resolvedReferenceColumns = await Promise.all(referenceColumns.map(async (columnObject) => {
+    // referenced table and valid values for reference
+
+    console.log("The column name is");
+    console.log(columnObject.name);
+
+    console.log("The table is");
+    console.log(tableInternalName);
+
+    const referencedColumnAndTableSql = format(`
+      SELECT 
+        information_schema.key_column_usage.referenced_table_name AS referencedTable,
+        information_schema.key_column_usage.referenced_column_name AS referencedColumn
+      FROM information_schema.key_column_usage
+      WHERE 
+        information_schema.key_column_usage.column_name = ? AND
+        information_schema.key_column_usage.table_name = ? AND
+        NOT isnull(information_schema.key_column_usage.referenced_table_name)
+      `, [columnObject.name, tableInternalName]
+    );
+
+    /** @type {{ referencedTable: string, referencedColumn: string }[][]} */
+    const [ [ { referencedTable, referencedColumn } ] ] = await SingletonConnection.instance.execute(referencedColumnAndTableSql);
+    
+    console.log("The referenced table is");
+    console.log(referencedTable);
+
+    console.log("The referenced column is");
+    console.log(referencedColumn);
+
+    const referencedTableIdentifier = await getTableIdentifier(referencedTable);
+    const sql = format(`SELECT * FROM ??`, [referencedTable]);
+
+    /** @type {Object[]} */
+    const [ validValues ] = await SingletonConnection.instance.execute(sql);
+
+    /** @type {import("../lib/dashboard-utilities.js").RecordIdentifier[]} */
+    const recordIdentifers = validValues.map(value => ({ id: value[referencedColumn], representation: value.toString() }))
+
+    return {
+      ...columnObject,
+      referencedTable: referencedTableIdentifier,
+      validValues: recordIdentifers
+    };
+  }));
+
+  return [  ...primitiveColumns, ...resolvedReferenceColumns ].sort((a, b) => a.index - b.index);
 }
 
 /**
@@ -235,49 +409,111 @@ async function tableExists(internalTableName) {
 
 /**
  * 
- * @param {IncomingColumnDescriptor} columnObject 
- * @returns {Promise<MidwayReferenceColumnDescriptor>}
+ * @param {number} databaseId 
+ * @returns {Promise<boolean>}
  */
-async function getMidwayReferenceDescriptor(columnObject) {
+async function databaseExistsWithId(databaseId) {
   const sql = format(`
-    SELECT 
-        information_schema.columns.DATA_TYPE AS dataType, 
-        information_schema.columns.COLUMN_NAME as referencedTableColumn
-    FROM information_schema.columns 
-    WHERE 
-      information_schema.columns.TABLE_NAME = ? AND 
-      information_schema.columns.COLUMN_KEY = 'PRI'
-    ;
-    `, columnObject.referencedTableId
+    SELECT COUNT(*) AS count
+    FROM base_de_datos 
+    WHERE base_de_datos.id = ?
+    `,
+    databaseId
+  );
+  await SingletonConnection.connect();
+
+  let [ [ { count } ] ] = await SingletonConnection.instance.execute(sql);
+
+  return count > 0;
+}
+
+/**
+ * 
+ * @param {string} internalTableName 
+ */
+async function deleteTable(internalTableName) {
+  const sql = format(
+    `DELETE FROM tabla WHERE tabla.nombre_interno = ?`, 
+    [internalTableName]
   );
 
   await SingletonConnection.connect();
 
-  const [ [ { dataType, referencedTableColumn } ] ] = await SingletonConnection.instance.execute(sql);
+  await SingletonConnection.instance.execute(sql);
+}
 
-  const { index, isAutoincrementable, isNullable, isPrimaryKey, isUnique, name, referencedTableId } = columnObject;
+/**
+ * 
+ * @param {string} externalTableName 
+ * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
+ * @param {IncomingColumnDescriptor[]} tableScheme 
+ */
+async function createTable(externalTableName, databaseIdentifier, tableScheme) {
+  const foreignKeys = tableScheme
+    .filter(columnObject => columnObject.dataType == "reference");
+  const regularColumns = tableScheme
+    .filter(columnObject => columnObject.dataType != "reference");
 
-  return {
-    index,
-    dataType,
-    isAutoincrementable,
-    isNullable,
-    isPrimaryKey,
-    isUnique,
-    name,
-    referencedTableColumn,
-    referencedTableId
-  };
+  const midwayForeignKeys = await Promise.all(foreignKeys
+      .map(async (columnObject) => await TableCreationUtilities.getMidwayReferenceDescriptor(columnObject)));
+  const midwayRegularColumns = regularColumns
+    .map(columnObject => TableCreationUtilities.getMidwayPrimitiveDescriptor(columnObject));
+
+  const primitiveColumns = [ ...midwayForeignKeys, ...midwayRegularColumns ];
+  primitiveColumns.sort((columnObject) => columnObject.index);
+
+  const primitiveSql = primitiveColumns
+      .map((columnObject) => TableCreationUtilities.getSqlForPrimitiveColumn(columnObject));
+  const referenceSql = midwayForeignKeys.map((columnObject) => TableCreationUtilities
+      .getSqlForReferenceColumn(columnObject));
+
+  const internalTableName = uuidv4();
+  const tableBody = [...primitiveSql, ...referenceSql].join(",\n");
+
+  await SingletonConnection.connect();
+
+  const tableRegistrationSql = format(
+    `INSERT INTO tabla VALUES (NULL, ?, ?, ?)`, 
+    [databaseIdentifier.id, externalTableName, internalTableName]
+  );
+
+  await SingletonConnection.instance.execute(tableRegistrationSql);
+
+  try {
+    const tableCreationSql = `CREATE TABLE \`${internalTableName}\` (${tableBody}) ENGINE = InnoDB`;
+    await SingletonConnection.instance.execute(tableCreationSql);
+
+  } catch (error) {
+    await deleteTable(internalTableName);
+    throw error;
+  }
+}
+
+async function deleteTable(selectedDatabase, selectedTable) {
+  const databaseId = await getDatabaseId(selectedDatabase);
+
+  await SingletonConnection.connect();
+  const sql = format(`
+    DELETE FROM tabla WHERE tabla.base_de_datos = ? AND tabla.nombre_externo = ?
+    `,
+    [ databaseId, selectedTable ]
+  );
+  await SingletonConnection.instance.execute(sql);
 }
 
 module.exports = {
   getDatabases,
   getDatabaseId,
-  getRegistries,
+  getRecords,
   getSchema,
   getTables,
   getTablesWithBothNames,
   getIndexedTablesWithBothNames,
-  getMidwayReferenceDescriptor,
-  tableExists
+  getTableIdentifiers,
+  getTableIdentifier,
+  getDatabaseIdentifiers,
+  tableExists,
+  createTable,
+  deleteTable,
+  databaseExistsWithId,
 }

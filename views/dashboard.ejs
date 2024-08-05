@@ -1,46 +1,17 @@
 <%- include("./templates/long-header.ejs"); %>
-
         <% 
-        if (typeof informacionDeRegistros == "undefined" && typeof informacionDeTablas != "undefined") { 
+        if (dashboardMode === "tables") { 
         %>
-
-            <h1>
-                <%- informacionDeTablas.baseDeDatosSeleccionada %>
-            </h1>
-
-            <div class="dashboard__card-container">
-                <a href="/new/<%- informacionDeTablas.baseDeDatosSeleccionada %>/table" class="dashboard__table-card dashboard__table-card--new-card">
-                    <span class="dashboard__table-card__name">
-                        Crear tabla
-                    </span>
-                </a>
-                <%
-                    for (let tabla of informacionDeTablas.tablas) {
-                %>
-                    <a class="dashboard__table-card" href="/databases/<%- informacionDeTablas.baseDeDatosSeleccionada %>/<%- tabla %>">
-                        <%= tabla %>
-                    </a>
-                <%
-                }
-                %>
-            </div>
-
+            <%- include("./visualizador-de-tablas") %>
         <%
-        } else if (typeof informacionDeRegistros != "undefined") {
+        } else if (dashboardMode === "records") {
         %>
-            <%- 
-                include("./tabla-de-registros");
-            %>
+            <%- include("./visualizador-de-registros"); %>
         <%
         } else {
         %>
-            <h1>Selecciona una base de datos para comenzar</h1>
-            <img style="
-            max-width: 100%;
-            " src="/web/images/selecciona-una-base-de-datos.png" alt="Selecciona una base de datos para empezar" srcset="">
+            <%- include("./selecciona-una-bd");  %>
         <%
         }
         %>
-    </div>
-
 <%- include("./templates/long-footer.ejs"); %>

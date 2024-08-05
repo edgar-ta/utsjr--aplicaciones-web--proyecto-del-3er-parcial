@@ -1,143 +1,166 @@
 const ruta = require("express").Router();
-const { format } = require("mysql2");
-const DatabaseController = require("../bd/database-controller");
-const TableDataValidation = require("../lib/table-data-validation");
-const { v4: uuidv4 } = require("uuid");
-const SingletonConnection = require("../bd/singleton-connection");
+const DatabaseController = require("../bd/database-controller.js");
+const TableDataValidation = require("../lib/table-data-validation.js");
+const DashboardUtilities = require("../lib/dashboard-utilities.js");
+const { getRecordVisualizationPayload } = require("../lib/record-visualization.js");
+
+async function ensureValidDatabase(request, response, next) {
+    try {
+        const selectedDatabase = request.params.selectedDatabase;
+        const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(selectedDatabase);
+        if (databaseIdentifier === null) {
+            console.log(databaseIdentifier);
+            return next(new Error(`La url ingresada no es válida`));
+        }
+        const databaseId = databaseIdentifier.id;
+        const databaseExists = await DatabaseController.databaseExistsWithId(databaseId);
+        if (!databaseExists) {
+            console.log("La base de datos indicada no existe");
+            return next(new Error(`La base de datos indicada en la URL no existe`));
+        }
+        next();
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function ensureValidTable(request, response, next) {
+    try {
+        const selectedTable = request.params.selectedTable;
+        const tableIdentifier = DashboardUtilities.parseTableIdentifier(selectedTable);
+        if (tableIdentifier === null) {
+            return next(new Error(`La url ingresada no es válida`));
+        }
+        const tableInternalName = tableIdentifier.internalName;
+        const tableExists = await DatabaseController.tableExists(tableInternalName);
+        if (!tableExists) {
+            console.log(`Internal name: ${tableInternalName}`);
+            console.log(`External name: ${tableIdentifier.externalName}`);
+            return next(new Error(`La tabla indicada en la URL no existe`));
+        }
+        return next();
+    } catch (error) {
+        return next(error);
+    }
+}
 
 ruta.get("/", async (request, response) => {
   response.render("index");
 });
 
-ruta.get("/databases", async (request, response) => {
-    const basesDeDatos = await DatabaseController.getDatabases() || [];
+ruta.get("/databases", async (request, response, next) => {
+    try {
+        const dashboardPayload = await DashboardUtilities.getDashboardPayload(null);
 
-    response.render("dashboard", { basesDeDatos });
+        response.render("dashboard", {
+            getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
+            getUrlForTable: DashboardUtilities.getUrlForTable,
+            dashboardPayload,
+            recordVisualizationPayload: null,
+            dashboardMode: "preview"
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 });
 
-ruta.get("/databases/:selectedDatabase", async (request, response) => {
-    const selectedDatabase = request.params.selectedDatabase;
+ruta.get("/databases/:selectedDatabase", ensureValidDatabase, async (request, response) => {
+    try {
+        const dashboardPayload = await DashboardUtilities.getDashboardPayload(request.params.selectedDatabase);
 
-    const databases = await DatabaseController.getDatabases() || [];
-    const tables = await DatabaseController.getTables(selectedDatabase) || [];
-
-
-    response.render("dashboard", { 
-        basesDeDatos: databases, 
-        informacionDeTablas: {
-            baseDeDatosSeleccionada: selectedDatabase,
-            tablas: tables,
-        },
-    });
+        response.render("dashboard", {
+            getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
+            getUrlForTable: DashboardUtilities.getUrlForTable,
+            dashboardPayload,
+            recordVisualizationPayload: null,
+            dashboardMode: "tables"
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 });
 
-ruta.get("/databases/:selectedDatabase/:selectedTable", async (request, response) => {
-    const selectedDatabase = request.params.selectedDatabase;
-    const selectedTable = request.params.selectedTable;
+ruta.get("/databases/:selectedDatabase/:selectedTable", ensureValidDatabase, ensureValidTable, async (request, response, next) => {
+    try {
+        const dashboardPayload = await DashboardUtilities.getDashboardPayload(request.params.selectedDatabase);
+        const recordVisualizationPayload = await getRecordVisualizationPayload(request.params.selectedTable);
+        console.log(recordVisualizationPayload);
 
-    const databases = await DatabaseController.getDatabases() || [];
-    const tables = await DatabaseController.getTables(selectedDatabase) || [];
-    const registries = await DatabaseController.getRegistries(selectedTable) || [];
-    const schema = await DatabaseController.getSchema(selectedTable);
-
-    response.render("dashboard", {
-        basesDeDatos: databases,
-        informacionDeTablas: {
-            baseDeDatosSeleccionada: selectedDatabase, 
-            tablas: tables,
-        },
-        informacionDeRegistros: {
-            tablaSeleccionada: selectedTable,
-            registros: registries,
-            esquema: schema
-        }
-    });
+        response.render("dashboard", {
+            getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
+            getUrlForTable: DashboardUtilities.getUrlForTable,
+            dashboardPayload,
+            recordVisualizationPayload,
+            dashboardMode: "records"
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 });
 
-ruta.get("/new/:selectedDatabase/table", async (request, response) => {
-    const selectedDatabase = request.params.selectedDatabase;
-
-    const databases = await DatabaseController.getDatabases() || [];
-    const tables = await DatabaseController.getIndexedTablesWithBothNames(selectedDatabase) || [];
-
-    response.render("crear-tabla", { 
-        basesDeDatos: databases, 
-        tablas: tables,
-        baseDeDatosSeleccionada: request.params.selectedDatabase 
-    });
+ruta.get("/new/:selectedDatabase/table", async (request, response, next) => {
+    try {
+        const dashboardPayload = await DashboardUtilities.getDashboardPayload(request.params.selectedDatabase);
+        response.render("crear-tabla", { 
+            getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
+            getUrlForTable: DashboardUtilities.getUrlForTable,
+            dashboardPayload,
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 });
 
-ruta.post("/new/:selectedDatabase/table", async (request, response, next) => {
+ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, response, next) => {
     try {
         const selectedDatabase = request.params.selectedDatabase;
+        const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(selectedDatabase);
+        // DatabaseController.getDatabaseId();
 
         const truthyValue = "on";
         const falsyValue = "none";
 
         const userData = TableDataValidation.getUserDataFromRequestBody(request, truthyValue, falsyValue);
 
-        console.log("This is the user data");
-        console.log(userData);
-
         let validationResult = await TableDataValidation.validateUserData(userData, truthyValue, falsyValue);
         if (validationResult !== null) {
             console.log(validationResult);
-            response.redirect(`/new/${selectedDatabase}/table`);
-            console.log("the validation didnt' work");
+            response.redirect(`/new/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/table`);
             return;
         }
+
         const enhancedUserData = TableDataValidation.enhanceUserData(userData);
         const tableScheme = TableDataValidation.buildTableScheme(enhancedUserData);
 
-        console.log("This is the enhanced user data");
-        console.log(enhancedUserData);
-        console.log("This is the scheme");
-        console.log(tableScheme);
-
         validationResult = TableDataValidation.validateTableScheme(tableScheme);
         if (validationResult !== null) {
-            response.redirect(`/new/${selectedDatabase}/table`);
-            console.log(validationResult.message);
+            console.log(validationResult);
+            response.redirect(`/new/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/table`);
             return;
         }
 
-        const foreignKeys = tableScheme.filter(columnObject => columnObject.dataType == "reference");
-        const regularColumns = tableScheme.filter(columnObject => columnObject.dataType != "reference");
-
-        const midwayForeignKeys = await Promise.all(foreignKeys.map(async (columnObject) => await DatabaseController.getMidwayReferenceDescriptor(columnObject)));
-        const midwayRegularColumns = regularColumns.map(columnObject => TableDataValidation.getMidwayPrimitiveDescriptor(columnObject));
-
-        console.log("These are the midway regular columns");
-        console.log(midwayRegularColumns);
-
-        const primitiveColumns = [ ...midwayForeignKeys, ...midwayRegularColumns ];
-        primitiveColumns.sort((columnObject) => columnObject.index);
-
-        const primitiveSql = primitiveColumns.map((columnObject) => TableDataValidation.getSqlForPrimitiveColumn(columnObject));
-        const referenceSql = midwayForeignKeys.map((columnObject) => TableDataValidation.getSqlForReferenceColumn(columnObject));
-
-        const internalTableName = uuidv4();
         const externalTableName = enhancedUserData.tableName;
+        await DatabaseController.createTable(externalTableName, databaseIdentifier, tableScheme);
 
-        const tableBody = [...primitiveSql, ...referenceSql].join(",\n");
+        console.log("The table was created successfully");
 
-        const databaseId = await DatabaseController.getDatabaseId(selectedDatabase);
+        response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}`);
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
 
-        await SingletonConnection.connect();
+ruta.get("/delete/:selectedDatabase/:selectedTable", async (request, response, next) => {
+    try {
+        const selectedDatabase = request.params.selectedDatabase;
+        const selectedTable = request.params.selectedTable;
 
-        const tableRegistrationSql = format(`INSERT INTO tabla VALUES (NULL, ?, ?, ?)`, [databaseId, externalTableName, internalTableName]);
-        await SingletonConnection.instance.execute(tableRegistrationSql);
-        try {
-            console.log("This is the table body");
-            console.log(tableBody);
-            const tableCreationSql = `CREATE TABLE \`${internalTableName}\` (${tableBody}) ENGINE = InnoDB`;
-            await SingletonConnection.instance.execute(tableCreationSql);
-
-        } catch (error) {
-            const tableDeletionSql = format(`DELETE FROM tabla WHERE tabla.nombre_interno = ?`, [internalTableName]);
-            await SingletonConnection.instance.execute(tableDeletionSql);
-            throw error;
-        }
+        await DatabaseController.deleteTable(selectedDatabase, selectedTable);
 
         response.redirect(`/databases/${selectedDatabase}`);
     } catch (error) {
