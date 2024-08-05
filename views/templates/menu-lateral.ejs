@@ -15,7 +15,7 @@
                         if (dashboardPayload.currentDatabase !== null && dashboardPayload.currentDatabase.id === database.id) {
                     %>
                             
-                        <ul>
+                        <ul data-current-database-anchor>
                             <% 
                             for (let table of dashboardPayload.currentTables) {
                             %>
@@ -35,6 +35,7 @@
             <%
             }
             %>
+        <a href="/new/database">Crear base de datos</a>
     </ul>
 </div>
 

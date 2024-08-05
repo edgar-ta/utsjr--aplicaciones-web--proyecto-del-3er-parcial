@@ -1,20 +1,33 @@
-<h1>
-    <%- dashboardPayload.currentDatabase.name %>
-</h1>
+<link rel="stylesheet" href="/web/css/visualizador.css">
 
-<div class="dashboard__card-container">
-    <a href="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" class="dashboard__table-card dashboard__table-card--new-card">
-        <span class="dashboard__table-card__name">
-            Crear tabla
-        </span>
-    </a>
-    <%
-        for (let table of dashboardPayload.currentTables) {
-    %>
-        <a class="dashboard__table-card" href="/databases/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(table) %>">
-            <%= table.externalName %>
+<div class="visualizador__container" data-database-id="<%- dashboardPayload.currentDatabase.id %>">
+    <input data-id="database-name-input" type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador__heading" placeholder="Ingresa el nombre de tu BD">
+    <a class="visualizador__delete-button" href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>">Eliminar base de datos</a>
+
+    <div class="dashboard__card-container">
+        <a href="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" class="dashboard__table-card dashboard__table-card--new-card">
+            <div class="dashboard__table-card__image-wrapper">
+                <div class="dashboard__table-card__image" style="background-image: url(/web/images/plus-icon.png);"></div>
+            </div>
+            <span class="dashboard__table-card__name">
+                Crear tabla
+            </span>
         </a>
-    <%
-    }
-    %>
+        <%
+            for (let table of dashboardPayload.currentTables) {
+        %>
+            <a class="dashboard__table-card" href="/databases/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(table) %>">
+                <div class="dashboard__table-card__image-wrapper">
+                    <div class="dashboard__table-card__image"></div>
+                </div>
+                <span class="dashboard__table-card__name">
+                    <%= table.externalName %>
+                </span>
+            </a>
+        <%
+        }
+        %>
+    </div>
 </div>
+
+<script src="/web/js/database-edition.js"></script>

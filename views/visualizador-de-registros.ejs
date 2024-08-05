@@ -1,7 +1,10 @@
-<h1>
+<link rel="stylesheet" href="/web/css/visualizador-de-registros.css">
+<link rel="stylesheet" href="/web/css/visualizador.css">
+<h1 class="visualizador__heading">
     <%- recordVisualizationPayload.currentTable.externalName %>
 </h1>
-<a href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
+<a class="visualizador__delete-button"
+    href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
 <table>
     <thead>
         <tr>
