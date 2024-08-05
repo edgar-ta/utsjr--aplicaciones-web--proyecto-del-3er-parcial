@@ -115,6 +115,15 @@ ruta.get("/new/:selectedDatabase/table", async (request, response, next) => {
     }
 });
 
+ruta.get("/new/database", async (request, response, next) => {
+    try {
+        
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
 ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, response, next) => {
     try {
         const selectedDatabase = request.params.selectedDatabase;

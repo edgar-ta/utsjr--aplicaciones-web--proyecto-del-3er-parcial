@@ -8,21 +8,66 @@
 
 .dashboard__table-card {
     display: flex;
-    background-color: pink;
+    background-color: #f0f0f0;
     min-height: 10rem;
-    border-radius: 3px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 3px;
     width: 100%;
     box-sizing: border-box;
+    text-decoration: none;
+    transition: 250ms ease-in-out background-color;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 1 / 1;
 }
 
-.dashboard__table-card {
-    text-decoration: none;
+.dashboard__table-card:hover {
+    background-color: #b4b4b4;
+}
+
+.dashboard__table-card:hover .dashboard__table-card__image {
+    transform: scale(1.1);
+    filter: none;
 }
 
 .dashboard__table-card--new-card {
     background-color: white;
-    border: 1px solid pink;
+    border: 1px solid #a0a0a0;
+}
+
+.dashboard__table-card__name {
+    color: black;
+    font-size: 0.75rem;
+    padding: 1rem;
+    line-clamp: 1;
+    font-family: 'Inter';
+}
+
+.dashboard__table-card__image {
+    background-color: white;
+    background-image: url(/web/images/mysql-logo.png);
+    filter: grayscale();
+    opacity: 0.75;
+
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 5px 5px 0 0;
+    width: 100%;
+    transition: 
+        250ms ease-in-out transform,
+        250ms ease-in-out filter
+    
+    ;
+}
+
+.dashboard__table-card__image-wrapper {
+    flex-grow: 1;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
 }
 
 .dashboard__card-container {
