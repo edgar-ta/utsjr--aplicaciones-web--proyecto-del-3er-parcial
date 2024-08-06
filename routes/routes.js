@@ -3,6 +3,7 @@ const DatabaseController = require("../bd/database-controller.js");
 const TableDataValidation = require("../lib/table-data-validation.js");
 const DashboardUtilities = require("../lib/dashboard-utilities.js");
 const { getRecordVisualizationPayload } = require("../lib/record-visualization.js");
+const { externalColumnTypeToSpanish } = require("../lib/single-function-files/external-column-type-to-spanish.js");
 
 async function ensureValidDatabase(request, response, next) {
     try {
@@ -38,6 +39,25 @@ async function ensureValidTable(request, response, next) {
             console.log(`External name: ${tableIdentifier.externalName}`);
             return next(new Error(`La tabla indicada en la URL no existe`));
         }
+        return next();
+    } catch (error) {
+        return next(error);
+    }
+}
+
+async function ensureValidColumn(request, response, next) {
+    try {
+        const selectedTable = request.params.selectedTable;
+        const tableIdentifier = DashboardUtilities.parseTableIdentifier(selectedTable);
+        const selectedColumn = request.params.selectedColumn;
+
+        await DatabaseController
+            .columnExists(tableIdentifier, selectedColumn)
+            .then((exists) => {
+                if (!exists) return Promise.reject(new Error("The given column doesn't exist in the table"));
+                return true;
+            });
+
         return next();
     } catch (error) {
         return next(error);
@@ -91,6 +111,7 @@ ruta.get("/databases/:selectedDatabase/:selectedTable", ensureValidDatabase, ens
         response.render("dashboard", {
             getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
             getUrlForTable: DashboardUtilities.getUrlForTable,
+            externalColumnTypeToSpanish,
             dashboardPayload,
             recordVisualizationPayload,
             dashboardMode: "records"
@@ -137,6 +158,9 @@ ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, r
         const falsyValue = "none";
 
         const userData = TableDataValidation.getUserDataFromRequestBody(request, truthyValue, falsyValue);
+
+        console.log("The user data is");
+        console.log(userData);
 
         let validationResult = await TableDataValidation.validateUserData(userData, truthyValue, falsyValue);
         if (validationResult !== null) {
@@ -192,7 +216,23 @@ ruta.get("/delete/:selectedDatabase/:selectedTable", ensureValidDatabase, ensure
 
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}`);
     } catch (error) {
+        // response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+        next(error);
+    }
+});
+
+ruta.get("/delete/:selectedDatabase/:selectedTable/:selectedColumn", ensureValidDatabase, ensureValidTable, ensureValidColumn, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const columnName = request.params.selectedColumn;
+    try {
+        await DatabaseController
+            .deleteColumn(tableIdentifier, columnName);
+            
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+
+    } catch (error) {
+        console.log(error);
         next(error);
     }
 });
@@ -212,6 +252,27 @@ ruta.get("/rename/database", async (request, response, next) => {
             })
             ;
     } catch (error) {
+        response.send({ ok: false, error });
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/rename/database/:selectedTable/:selectedColumn", ensureValidTable, ensureValidColumn, async (request, response, next) => {
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedColumn = request.params.selectedColumn;
+    const name = request.query.name;
+    try {
+        DatabaseController
+            .renameColumn(tableIdentifier, selectedColumn, name)
+            .then(() => {
+                response.send({ ok: true, error: null });
+            })
+            .catch((error) => {
+                response.send({ ok: false, error });
+            });
+    } catch (error) {
+        response.send({ ok: false, error });
         console.log(error);
         next(error);
     }

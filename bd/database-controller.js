@@ -411,7 +411,7 @@ async function tableExists(internalTableName) {
     FROM tabla 
     WHERE tabla.nombre_interno = ?
     `,
-    internalTableName
+    [internalTableName]
   );
   await SingletonConnection.connect();
 
@@ -507,6 +507,18 @@ async function renameDatabase(databaseId, name) {
 
 /**
  * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @param {string} name 
+ */
+async function renameColumn(tableIdentifier, columnName, name) {
+  const sql = format(`ALTER TABLE ?? RENAME COLUMN ?? TO ??`, [ tableIdentifier.internalName, columnName, name ]);
+  await SingletonConnection.connect();
+  return SingletonConnection.instance.execute(sql);
+}
+
+/**
+ * 
  * @param {string} externalTableName 
  * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
  * @param {IncomingColumnDescriptor[]} tableScheme 
@@ -552,6 +564,81 @@ async function createTable(externalTableName, databaseIdentifier, tableScheme) {
   }
 }
 
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @returns {Promise<boolean>}
+ */
+async function columnExists(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  const sql = format(
+    `SELECT COUNT(*) AS count 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE table_name = ? AND column_name = ?
+    `,
+    [ tableIdentifier.internalName, columnName ]
+  );
+  return SingletonConnection.instance.execute(sql).then(([ [ { count } ] ]) => count > 0);
+}
+
+/**
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ */
+async function columnIsPrimaryKey(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  const sql = format(
+    `SELECT column_key AS columnKey
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE 
+      table_name = ? AND 
+      column_name = ?
+    `, 
+    [ tableIdentifier.internalName, columnName ]
+  );
+  return SingletonConnection.instance
+    .execute(sql)
+    .then(([ [ { columnKey } ] ]) => columnKey === "PRI")
+    ;
+}
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @returns {Promise<Response>}
+ */
+async function deleteColumn(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  return columnIsPrimaryKey(tableIdentifier, columnName)
+    .then((isPrimaryKey) => {
+      if (isPrimaryKey) return Promise.reject(new Error("The column to delete was a primary key"));
+      let sql = format(`ALTER TABLE ?? DROP COLUMN ??`, [ tableIdentifier.internalName, columnName ]);
+      return SingletonConnection.instance.execute(sql);
+    })
+    ;
+  // const sql = format(`
+  //   SELECT 
+  //     column_name AS columnName,
+  //     column_key AS columnKey
+  //   FROM INFORMATION_SCHEMA.COLUMNS 
+  //   WHERE 
+  //     table_name = ? AND 
+  //     ordinal_position = ? 
+  //   `,
+  //   [ tableIdentifier.internalName, columnName ]
+  // );
+  // return SingletonConnection.instance.execute(sql)
+  //   .then(([ [ { columnName, columnKey } ] ]) => {
+  //     if (columnKey === "PRI") return Promise.reject(new Error("The column to delete was a primary key"));
+  //     let sql = format(`ALTER TABLE ?? DROP COLUMN ??`, [ tableIdentifier.internalName, columnName ]);
+  //     return SingletonConnection.instance.execute(sql);
+  //   })
+  // ;
+}
+
 /**
  * 
  * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
@@ -580,11 +667,15 @@ module.exports = {
   getTableIdentifiers,
   getTableIdentifier,
   getDatabaseIdentifiers,
+  columnExists,
+  columnIsPrimaryKey,
   tableExists,
   createTable,
   createDatabase,
   deleteTable,
   deleteDatabase,
+  deleteColumn,
   databaseExistsWithId,
   renameDatabase,
+  renameColumn
 }

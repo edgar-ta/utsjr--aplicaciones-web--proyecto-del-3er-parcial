@@ -1,78 +1,93 @@
 <link rel="stylesheet" href="/web/css/visualizador-de-registros.css">
 <link rel="stylesheet" href="/web/css/visualizador.css">
-<h1 class="visualizador__heading">
-    <%- recordVisualizationPayload.currentTable.externalName %>
-</h1>
-<a class="visualizador__delete-button"
-    href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
-<table>
-    <thead>
-        <tr>
-            <% 
-            for (let columnObject of recordVisualizationPayload.schema) {
-                %> 
-                <th>
-                    <div style="display: flex; flex-direction: column;">
-                        <div>
-                            <label for="">Nombre</label>
-                            <p>
-                                <%- columnObject.name %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Tipo de dato</label>
-                            <p>
-                                <%- columnObject.dataType %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Es clave primaria</label>
-                            <p>
-                                <%- columnObject.isPrimaryKey %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Es único</label>
-                            <p>
-                                <%- columnObject.isUnique %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Es autoincrementable</label>
-                            <p>
-                                <%- columnObject.isAutoincrementable %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Es nulo</label>
-                            <p>
-                                <%- columnObject.isNullable %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="">Es clave foránea</label>
-                            <p>
-                                <%- columnObject.isForeignKey %>
-                            </p>
-                        </div>
-                    </div>
-                </th>
-            <%
-            }
-                
-            %>
-        </tr>
-    </thead>
-    <tbody>
-        <% for (let record of recordVisualizationPayload.records) { %>
-            <tr>
-                <% for (let columnObject of recordVisualizationPayload.schema) { %>
-                    <td>
-                        <%- record[columnObject.name] %>
-                    </td>
-                <% } %>
-            </tr>
-        <% } %>
-    </tbody>
-</table>
 
+<div class="visualizador__container">
+    <h1 class="visualizador__heading">
+        <%- recordVisualizationPayload.currentTable.externalName %>
+    </h1>
+    <div class="visualizador__button-tray">
+        <a class="visualizador__button visualizador__button--delete"
+            href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
+
+        <a class="visualizador__button visualizador__button--insert"
+            href="/insert/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Insertar registro</a>
+
+        <a class="visualizador__button visualizador__button--edit"
+            href="/edit/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Editar tabla</a>
+    </div>
+    <div class="visualizador-de-registros__table-wrapper">
+    <table class="visualizador-de-registros__table">
+        <thead>
+            <tr class="visualizador-de-registros__tr">
+                <% 
+                for (let i = 0; i < recordVisualizationPayload.schema.length; i++) {
+                    const columnObject = recordVisualizationPayload.schema[i];
+                    %> 
+                    <th>
+                        <div class="visualizador-de-registros__column-header-wrapper">
+                            <div class="visualizador-de-registros__column-header" data-datatype="<%- columnObject.dataType %>">
+                                <span class="visualizador-de-registros__column-header__type">
+                                    <%- externalColumnTypeToSpanish(columnObject.dataType).toUpperCase() %>
+                                </span>
+                                <input data-id="column-name-input" data-column-name="<%- columnObject.name %>" class="visualizador-de-registros__column-header__name" value="<%- columnObject.name %>"/>
+                            </div>
+                            <div class="visualizador-de-registros__checkbox-container">
+                                <label for="" title="<%- columnObject.isPrimaryKey? "Es": "No Es" %> Clave Primaria" class="visualizador-de-registros__checkbox">
+                                    <span>
+                                        PRI
+                                    </span>
+                                    <input disabled type="checkbox" name="" id="" <% if (columnObject.isPrimaryKey) { %> checked <% } %> >
+                                </label>
+                                <label for="" title="<%- columnObject.isUnique? "Es": "No Es" %> Única" class="visualizador-de-registros__checkbox">
+                                    <span>
+                                        U
+                                    </span>
+                                    <input disabled type="checkbox" name="" id="" <% if (columnObject.isUnique) { %> checked <% } %> >
+                                </label>
+                                <label for="" title="<%- columnObject.isAutoincrementable? "Es": "No Es" %> Autoincrementable" class="visualizador-de-registros__checkbox">
+                                    <span>
+                                        AI
+                                    </span>
+                                    <input disabled type="checkbox" name="" id="" <% if (columnObject.isAutoincrementable) { %> checked <% } %> >
+                                </label>
+                                <label for="" title="<%- columnObject.isNullable? "Es": "No Es" %> Nulo" class="visualizador-de-registros__checkbox">
+                                    <span>
+                                        NUL
+                                    </span>
+                                    <input disabled type="checkbox" name="" id="" <% if (columnObject.isNullable) { %> checked <% } %> >
+                                </label>
+                            </div>
+                            <% if (i != 0) { %>
+                                <a class="visualizador-de-registros__delete-column-button"
+                                    href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- columnObject.name %>">
+                                    <i class="fa-solid fa-x"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                    </th>
+                <%
+                }
+                    
+                %>
+            </tr>
+        </thead>
+        <tbody>
+            <% for (let record of recordVisualizationPayload.records) { %>
+                <tr>
+                    <% for (let columnObject of recordVisualizationPayload.schema) { %>
+                        <td>
+                            <%- record[columnObject.name] %>
+                        </td>
+                    <% } %>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<script src="/web/js/table-edition.js"></script>
+
+<script>
+    setupColumnNameInputs("<%- getUrlForTable(recordVisualizationPayload.currentTable) %>");
+</script>

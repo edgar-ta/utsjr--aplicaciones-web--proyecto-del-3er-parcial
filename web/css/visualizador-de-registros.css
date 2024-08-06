@@ -1,2 +1,135 @@
+.visualizador-de-registros__checkbox-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+}
 
+.visualizador-de-registros__checkbox {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
 
+.visualizador-de-registros__checkbox > span {
+    font-size: small;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.visualizador-de-registros__checkbox > input {
+    width: 100%;
+    appearance: none;
+    aspect-ratio: 3 / 1;
+    background-color: lightgray;
+    border-radius: 1000px;
+    border: none;
+}
+
+.visualizador-de-registros__checkbox > input:checked {
+    background-color: green;
+}
+
+.visualizador-de-registros__checkbox:has(input:checked) > span {
+    color: white;
+}
+
+.visualizador-de-registros__tr > th {
+    width: 20vw;
+    min-width: 200px;
+    padding: 10px;
+}
+
+.visualizador-de-registros__tr > th:nth-child(odd) {
+    background-color: rgb(233, 233, 233);
+}
+
+.visualizador-de-registros__table-wrapper {
+    width: 100%;
+    position: relative;
+    height: 100%;
+    overflow: scroll;
+}
+
+.visualizador-de-registros__table {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.visualizador-de-registros__column-header[data-datatype='integer'] > .visualizador-de-registros__column-header__type::before {
+    content: '1️⃣';
+}
+
+.visualizador-de-registros__column-header[data-datatype='decimal'] > .visualizador-de-registros__column-header__type::before {
+    content: '➗';
+}
+
+.visualizador-de-registros__column-header[data-datatype='text'] > .visualizador-de-registros__column-header__type::before {
+    content: '✏️';
+}
+
+.visualizador-de-registros__column-header[data-datatype='date'] > .visualizador-de-registros__column-header__type::before {
+    content: '📅';
+}
+
+.visualizador-de-registros__column-header__name {
+    font-weight: normal;
+    border: none;
+    border-bottom: 1px solid black;
+    width: 100%;
+    outline: none;
+    font-family: 'Inter';
+    font-size: 1rem;
+    background-color: transparent;
+}
+
+.visualizador-de-registros__column-header__type {
+    font-weight: bolder;
+    color: lightgray;
+    width: 100%;
+    display: inline-flex;
+}
+
+.visualizador-de-registros__tr {
+    display: flex;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__column-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__delete-column-button {
+    color: red;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    background-color: lightcoral;
+    padding: 8px;
+    display: flex;
+    width: 1rem;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1000px;
+}
+
+.visualizador-de-registros__delete-column-button > i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.visualizador-de-registros__column-header-wrapper {
+    display: flex; 
+    flex-direction: column; 
+    gap: 2rem;
+    position: relative;
+}

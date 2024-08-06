@@ -158,6 +158,13 @@ ON INFORMATION_SCHEMA.TABLE_CONSTRAINTS.constraint_name = INFORMATION_SCHEMA.KEY
 WHERE INFORMATION_SCHEMA.COLUMNS.table_name = 'abc1';
 ;
 
+SELECT *
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE 
+	table_name = 'tabla' AND 
+    ordinal_position = 2 
+LIMIT 10;
+
 SELECT 
   tabla.nombre_externo AS nombreExterno,
   tabla.nombre_interno AS nombreInterno

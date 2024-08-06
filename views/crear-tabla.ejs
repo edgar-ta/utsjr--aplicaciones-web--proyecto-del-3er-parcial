@@ -34,7 +34,7 @@
                         <option value="text">
                             Texto
                         </option>
-                        <% if (dashboardPayload.currentTables.length > 0) { %>
+                        <% if (dashboardPayload.currentTables.length > 0 && false) { %>
                             <option value="reference">
                                 Referencia
                             </option>
@@ -43,7 +43,7 @@
                 </td>
                 <td>
                     <input type="hidden" name="isPrimaryKeyArray" value="none">
-                    <input type="radio" name="isPrimaryKeyArray" data-disabled-count="0" required data-id="column-is-primary-key">
+                    <input type="radio" name="isPrimaryKeyArray" disabled data-disabled-count="0" required data-id="column-is-primary-key">
                 </td>
                 <td>
                     <input type="hidden" name="isNullableArray" value="none">
@@ -55,7 +55,7 @@
                 </td>
                 <td>
                     <input type="hidden" name="isAutoincrementableArray" value="none">
-                    <input type="checkbox" name="isAutoincrementableArray" data-disabled-count="0" data-id="column-is-autoincrementable">
+                    <input type="checkbox" name="isAutoincrementableArray" disabled data-disabled-count="0" data-id="column-is-autoincrementable">
                 </td>
             </tr>
         </template>
