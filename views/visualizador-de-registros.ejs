@@ -14,6 +14,20 @@ const externalColumnTypeToInputType = (type) => {
     }
 }
 
+const twoDigitRepresentation = (number) => {
+    if (number < 10) return `0${number}`;
+    return `${number}`;
+}
+
+const formatDate = (date) => {
+    const [ month, day, year] = [
+        date.getMonth(),
+        date.getDate(),
+        date.getFullYear(),
+    ];
+    return `${year}-${twoDigitRepresentation(month + 1)}-${twoDigitRepresentation(day)}`;
+}
+
 %>
 
 <div class="visualizador__container">
@@ -32,8 +46,15 @@ const externalColumnTypeToInputType = (type) => {
     <div data-id="new-record-container">
         <!--  -->
     </div>
-    <div class="visualizador-de-registros__table-wrapper">
+    <h2>Visualizar registros actuales</h2>
+    <div 
+        class="visualizador-de-registros__table-wrapper"
+        <% if (recordVisualizationPayload.records.length == 0) { %>
+        data-no-records="true"
+        <% } %>
+        >
         <template data-id="new-record-template">
+            <h2 data-id="new-record-title" class="visualizador-de-registros__new-record__title">Editar nuevo registro</h2>
             <div data-id="new-record" class="visualizador-de-registros__new-record__wrapper">
                 <div class="visualizador-de-registros__new-record__toolbar">
                     <button data-id="save-button" class="square-button" title="Guardar">
@@ -45,10 +66,15 @@ const externalColumnTypeToInputType = (type) => {
                 </div>
                 <div class="visualizador-de-registros__new-record-container">
                     <div class="visualizador-de-registros__new-record-subcontainer">
-                        <form class="visualizador-de-registros__new-record" action="/insert/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>" method="post">
+                        <form 
+                            style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);"
+                            class="visualizador-de-registros__new-record" 
+                            action="/insert/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>" 
+                            method="post"
+                            >
                             <% for (let columnObject of recordVisualizationPayload.schema) { %>
                                 <div class="visualizador-de-registros__new-record-column">
-                                    <span class="visualizador-de-registros__new-record__column-title">
+                                    <p class="visualizador-de-registros__new-record__column-title">
                                         <% if (columnObject.isPrimaryKey) { %>
                                             <i class="fa-solid fa-key"></i>
                                         <% } else {
@@ -72,12 +98,18 @@ const externalColumnTypeToInputType = (type) => {
                                         }
                                         %>
                                         <%- columnObject.name %>
-                                    </span>
+                                        &nbsp;
+                                        <span class="visualizador-de-registros-new-record__column-type">
+                                            &lpar;
+                                            <%- externalColumnTypeToSpanish(columnObject.dataType) %>
+                                            &rpar;
+                                        </span>
+                                    </p>
                                     <div class="visualizador-de-registros__new-record__input-wrapper">
                                         <input 
                                             type="<%- externalColumnTypeToInputType(columnObject.dataType) %>" 
-                                            class="visualizador-de-registros__new-record__input"
-                                            name="" 
+                                            class="visualizador-de-registros__new-record__input openable-input"
+                                            name="payload"
                                             data-column-name="<%- columnObject.name %>"
                                             id=""
                                             <% if (columnObject.dataType == 'integer') { %>
@@ -110,7 +142,7 @@ const externalColumnTypeToInputType = (type) => {
         </template>
         <table class="visualizador-de-registros__table" data-id="records-table">
             <thead>
-                <tr class="visualizador-de-registros__tr">
+                <tr style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);" class="visualizador-de-registros__tr">
                     <% 
                     for (let i = 0; i < recordVisualizationPayload.schema.length; i++) {
                         const columnObject = recordVisualizationPayload.schema[i];
@@ -188,18 +220,58 @@ const externalColumnTypeToInputType = (type) => {
                     %>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="visualizador-de-registros__record__tbody">
                 <% for (let record of recordVisualizationPayload.records) { %>
-                    <tr>
-                        <% for (let columnObject of recordVisualizationPayload.schema) { %>
-                            <td 
-                                data-column-name="<%- columnObject.name %>" 
-                                <% if (columnObject.isPrimaryKey) { %>
-                                data-is-primary-key="true"
-                                disabled
+                    <tr class="visualizador-de-registros__record" style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);">
+                        <% for (let i = 0; i < recordVisualizationPayload.schema.length; i++) { 
+                            const columnObject = recordVisualizationPayload.schema[i];
+                            const nameOfPrimaryKey = recordVisualizationPayload.schema[0].name;
+                            %>
+                            <td class="visualizador-de-registros__record__td">
+                                <% if (i == 0) { %>
+                                    <div class="visualizador-de-registros__record__toolbar">
+                                        <a 
+                                            href="/delete-record/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- record[nameOfPrimaryKey] %>" 
+                                            class="square-button" title="Eliminar registro"
+                                            >
+                                            <i class="fa-solid fa-x"></i>
+                                        </a>
+                                        <a href="" class="square-button" title="Guardar cambios">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                    </div>
                                 <% } %>
-                                >
-                                <%- record[columnObject.name] %>
+                                <input 
+                                    type="<%- externalColumnTypeToInputType(columnObject.dataType) %>" 
+                                    class="visualizador-de-registros__record__input openable-input"
+                                    name="payload"
+                                    data-column-name="<%- columnObject.name %>"
+                                    id=""
+                                    <% if (columnObject.dataType == 'date') { %>
+                                        value="<%- formatDate(record[columnObject.name]) %>"
+                                    <% } else { %>
+                                        value="<%- record[columnObject.name] %>"
+                                    <% } %>
+                                    <% if (columnObject.dataType == 'integer') { %>
+                                        inputmode="numeric"
+                                        pattern="\d+"
+                                        step="1"
+                                    <% } %>
+                                    <% if (columnObject.dataType == 'decimal') { %>
+                                        inputmode="numeric"
+                                        step="0.1"
+                                    <% } %>
+                                    <% if (columnObject.isPrimaryKey) { %>
+                                        disabled
+                                        data-is-primary-key="true"
+                                    <% } %>
+                                    <% if (!columnObject.isNullable) { %>
+                                        required
+                                    <% } %>
+                                    <% if (columnObject.isUnique) { %>
+                                        data-is-unique="true"
+                                    <% } %>
+                                    >
                             </td>
                         <% } %>
                     </tr>
@@ -207,6 +279,10 @@ const externalColumnTypeToInputType = (type) => {
             </tbody>
         </table>
     </div>
+    <% if (recordVisualizationPayload.records.length == 0) { %>
+        <h3>Aún no has ingresado registros en esta base de datos</h3>
+        <img style="max-width: 100%;" src="/web/images/selecciona-una-base-de-datos.png" alt="">
+    <% } %>
 </div>
 
 <script src="/web/js/table-edition.js"></script>

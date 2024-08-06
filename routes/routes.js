@@ -64,6 +64,14 @@ async function ensureValidColumn(request, response, next) {
     }
 }
 
+function ensureValidId(request, response, next) {
+    const selectedId = Number.parseInt(request.params.selectedId);
+    if (Number.isNaN(selectedId) || selectedId <= 0) {
+        return next(new Error("The given record id is not valid"));
+    }
+    return next();
+}
+
 ruta.get("/", async (request, response) => {
   response.render("index");
 });
@@ -106,7 +114,6 @@ ruta.get("/databases/:selectedDatabase/:selectedTable", ensureValidDatabase, ens
     try {
         const dashboardPayload = await DashboardUtilities.getDashboardPayload(request.params.selectedDatabase);
         const recordVisualizationPayload = await getRecordVisualizationPayload(request.params.selectedTable);
-        console.log(recordVisualizationPayload);
 
         response.render("dashboard", {
             getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
@@ -158,9 +165,6 @@ ruta.post("/new/:selectedDatabase/table", ensureValidDatabase, async (request, r
         const falsyValue = "none";
 
         const userData = TableDataValidation.getUserDataFromRequestBody(request, truthyValue, falsyValue);
-
-        console.log("The user data is");
-        console.log(userData);
 
         let validationResult = await TableDataValidation.validateUserData(userData, truthyValue, falsyValue);
         if (validationResult !== null) {
@@ -273,6 +277,39 @@ ruta.get("/rename/database/:selectedTable/:selectedColumn", ensureValidTable, en
             });
     } catch (error) {
         response.send({ ok: false, error });
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.post("/insert/:selectedDatabase/:selectedTable", ensureValidDatabase, ensureValidTable, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const payload = request.body.payload;
+    try {
+        DatabaseController
+            .insertRecord(tableIdentifier.internalName, payload)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/delete-record/:selectedDatabase/:selectedTable/:selectedId", ensureValidDatabase, ensureValidTable, ensureValidId, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedId = Number.parseInt(request.params.selectedId);
+    
+    try {
+        DatabaseController
+            .deleteRecord(tableIdentifier.internalName, selectedId)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
+    } catch (error) {
         console.log(error);
         next(error);
     }

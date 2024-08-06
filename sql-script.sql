@@ -184,3 +184,10 @@ WHERE information_schema.columns.COLUMN_KEY = "PRI"
         NOT isnull(information_schema.key_column_usage.referenced_table_name)
         ;
 
+SELECT * FROM information_schema.key_column_usage LIMIT 10;
+SELECT information_schema.columns.column_name AS columnName
+FROM information_schema.columns 
+WHERE 
+	information_schema.columns.table_name = 'tabla' AND 
+    information_schema.columns.column_key = 'PRI'
+;

@@ -108,7 +108,7 @@ insertionButton.addEventListener("click", (event) => {
 
     setupNewRecordConstraints(newRecord);
 
-    newRecordContainer.appendChild(newRecord);
+    newRecordContainer.appendChild(newRecordFragment);
 });
 
 /**
@@ -173,7 +173,10 @@ function setupNewRecordConstraints(newRecord) {
     const cancelButton = newRecord.querySelector("[data-id='cancel-button']");
 
     cancelButton.addEventListener("click", (event) => {
+        const newRecordTitle = document.querySelector("[data-id='new-record-title']");
+
         newRecord.remove();
+        newRecordTitle.remove();
     });
 
     /** @type {HTMLInputElement} */

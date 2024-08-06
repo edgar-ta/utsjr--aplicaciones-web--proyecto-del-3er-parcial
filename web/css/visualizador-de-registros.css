@@ -58,6 +58,11 @@
     position: relative;
     height: 100%;
     overflow: scroll;
+    min-height: 70vh;
+}
+
+.visualizador-de-registros__table-wrapper[data-no-records] {
+    min-height: 25vh;
 }
 
 .visualizador-de-registros__table {
@@ -83,7 +88,8 @@
 }
 
 .visualizador-de-registros__tr {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 }
 
@@ -125,7 +131,8 @@
 }
 
 .visualizador-de-registros__new-record {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     height: 100%;
     gap: 1rem;
 }
@@ -135,7 +142,11 @@
     min-width: 250px;
 }
 
-.visualizador-de-registros__new-record__input-wrapper {
+.visualizador-de-registros__new-record__title {
+    margin-bottom: 0;
+}
+
+.visualizador-de-registros__new-record__input-wrapper, .visualizador-de-registros__record__td {
     display: flex;
     box-sizing: border-box;
     padding: 10px;
@@ -144,19 +155,11 @@
     flex-grow: 1;
 }
 
-.visualizador-de-registros__new-record__input {
+.visualizador-de-registros__new-record__input, .visualizador-de-registros__record__input {
     border: none;
     font-size: 1rem;
     width: 100%;
     outline: none;
-}
-
-.visualizador-de-registros__new-record__input:not([disabled]) {
-    cursor: pointer;
-}
-
-.visualizador-de-registros__new-record__input:focus {
-    cursor: text;
 }
 
 .visualizador-de-registros__new-record-column {
@@ -169,6 +172,12 @@
     font-size: smaller;
     font-family: 'Inter';
     margin-bottom: 5px;
+    margin-top: 0;
+    margin-inline: 0;
+}
+
+.visualizador-de-registros-new-record__column-type {
+    color: #a0a0a0;
 }
 
 .visualizador-de-registros__new-record:hover .visualizador-de-registros__new-record__toolbar {
@@ -199,3 +208,37 @@
     justify-content: center;
 }
 
+
+.visualizador-de-registros__record {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__record__tbody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.visualizador-de-registros__record__td {
+    position: relative;
+}
+
+.visualizador-de-registros__record__toolbar {
+    position: absolute;
+    top: 50%;
+    left: 0.25rem;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: 250ms ease-in-out opacity;
+}
+
+.visualizador-de-registros__record:hover .visualizador-de-registros__record__toolbar {
+    opacity: 1;
+}
+
+.visualizador-de-registros__record__input[data-is-primary-key], .visualizador-de-registros__new-record__input[data-is-primary-key] {
+    text-align: right;
+}
