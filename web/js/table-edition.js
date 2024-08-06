@@ -112,6 +112,57 @@ insertionButton.addEventListener("click", (event) => {
 });
 
 /**
+ * 
+ * @returns {number} The id that would correspond to a new record that the user wishes to create
+ */
+function getNextRecordId() {
+    /** @type {HTMLTableElement} */
+    const recordsTable = document.querySelector("[data-id='records-table']");
+    const recordsTableBody = recordsTable.querySelector("tbody");
+    const records = Array.of(...recordsTableBody.querySelectorAll("tr").values());
+    if (records.length == 0) {
+        return 1; // this value is not really accurante, but it is a good placeholder for most of the time
+    }
+    const lastRecord = records.at(-1);
+    const lastId = Number.parseInt(lastRecord.querySelector("[data-is-primary-key='true']").value);
+    return lastId + 1;
+}
+
+/**
+ * 
+ * @param {string} currentValue 
+ * @param {string} columnName 
+ * @returns {boolean}
+ */
+function areValuesUnique(currentValue, columnName) {
+    /** @type {HTMLTableElement} */
+    const recordsTable = document.querySelector("[data-id='records-table']");
+    const recordsTableBody = recordsTable.querySelector("tbody");
+
+    const rows = Array.of(...recordsTableBody.querySelectorAll("tr").values());
+    for (let row of rows) {
+        /** @type {HTMLInputElement[]} */
+        const inputs = Array.of(...row.querySelectorAll("data-column-name").values());
+        const selectedInput = inputs.find((input) => input.getAttribute("data-column-name") === columnName);
+        if (selectedInput === null) continue;
+        if (selectedInput.value === currentValue) return false;
+    }
+    return true;
+}
+
+function validateUniqueInputs(validationForm) {
+    /** @type {HTMLInputElement[]} */
+    const uniqueInputs = Array.of(...validationForm.querySelectorAll("input[data-is-unique='true']").values());
+    uniqueInputs.forEach(uniqueInput => {
+        const currentValue = uniqueInput.value;
+        const columnName = uniqueInput.getAttribute("data-column-name");
+        if (!areValuesUnique(currentValue, columnName)) {
+            uniqueInput.setCustomValidity("El valor ingresado debe ser único");
+        }
+    });
+}
+
+/**
  * Sets the listeners that ensure the fields marked as unique are valid
  * and also creates an automatic id for the new record; also, makes
  * the 'cancel' button work
@@ -121,7 +172,24 @@ function setupNewRecordConstraints(newRecord) {
     /** @type {HTMLButtonElement} */
     const cancelButton = newRecord.querySelector("[data-id='cancel-button']");
 
-    cancelButton.addEventListener("click", (ever) => {
+    cancelButton.addEventListener("click", (event) => {
         newRecord.remove();
+    });
+
+    /** @type {HTMLInputElement} */
+    const idInput = newRecord.querySelector("[data-is-primary-key]");
+    idInput.value = getNextRecordId();
+
+    /** @type {HTMLButtonElement} */
+    const saveButton = newRecord.querySelector("[data-id='save-button']");
+    saveButton.addEventListener("click", (event) => {
+        const validationForm = newRecord.querySelector("form");
+        const inputs = Array.of(...validationForm.querySelectorAll("input").values());
+
+        if (inputs.every(input => input.checkValidity())) {
+            validateUniqueInputs(validationForm);
+        }
+
+        validationForm.requestSubmit();
     });
 }

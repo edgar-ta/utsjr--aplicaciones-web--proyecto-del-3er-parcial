@@ -36,7 +36,7 @@ const externalColumnTypeToInputType = (type) => {
         <template data-id="new-record-template">
             <div data-id="new-record" class="visualizador-de-registros__new-record__wrapper">
                 <div class="visualizador-de-registros__new-record__toolbar">
-                    <button class="square-button" title="Guardar">
+                    <button data-id="save-button" class="square-button" title="Guardar">
                         <i class="fa-solid fa-check"></i>
                     </button>
                     <button data-id="cancel-button" class="square-button" title="Cancelar">
@@ -45,9 +45,9 @@ const externalColumnTypeToInputType = (type) => {
                 </div>
                 <div class="visualizador-de-registros__new-record-container">
                     <div class="visualizador-de-registros__new-record-subcontainer">
-                        <form class="visualizador-de-registros__new-record">
+                        <form class="visualizador-de-registros__new-record" action="/insert/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>" method="post">
                             <% for (let columnObject of recordVisualizationPayload.schema) { %>
-                                <div data-column-name="<%- columnObject.name %>" class="visualizador-de-registros__new-record-column">
+                                <div class="visualizador-de-registros__new-record-column">
                                     <span class="visualizador-de-registros__new-record__column-title">
                                         <% if (columnObject.isPrimaryKey) { %>
                                             <i class="fa-solid fa-key"></i>
@@ -78,7 +78,17 @@ const externalColumnTypeToInputType = (type) => {
                                             type="<%- externalColumnTypeToInputType(columnObject.dataType) %>" 
                                             class="visualizador-de-registros__new-record__input"
                                             name="" 
+                                            data-column-name="<%- columnObject.name %>"
                                             id=""
+                                            <% if (columnObject.dataType == 'integer') { %>
+                                                inputmode="numeric"
+                                                pattern="\d+"
+                                                step="1"
+                                            <% } %>
+                                            <% if (columnObject.dataType == 'decimal') { %>
+                                                inputmode="numeric"
+                                                step="0.1"
+                                            <% } %>
                                             <% if (columnObject.isPrimaryKey) { %>
                                                 disabled
                                                 data-is-primary-key="true"
@@ -98,7 +108,7 @@ const externalColumnTypeToInputType = (type) => {
                 </div>
             </div>
         </template>
-        <table class="visualizador-de-registros__table">
+        <table class="visualizador-de-registros__table" data-id="records-table">
             <thead>
                 <tr class="visualizador-de-registros__tr">
                     <% 
@@ -182,7 +192,13 @@ const externalColumnTypeToInputType = (type) => {
                 <% for (let record of recordVisualizationPayload.records) { %>
                     <tr>
                         <% for (let columnObject of recordVisualizationPayload.schema) { %>
-                            <td>
+                            <td 
+                                data-column-name="<%- columnObject.name %>" 
+                                <% if (columnObject.isPrimaryKey) { %>
+                                data-is-primary-key="true"
+                                disabled
+                                <% } %>
+                                >
                                 <%- record[columnObject.name] %>
                             </td>
                         <% } %>
