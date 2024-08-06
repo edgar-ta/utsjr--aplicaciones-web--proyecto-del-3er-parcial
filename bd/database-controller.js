@@ -691,7 +691,7 @@ async function deleteRecord(tableInternalName, id) {
       information_schema.columns.table_name = ? AND 
       information_schema.columns.column_key = 'PRI'
     `,
-    tableInternalName
+    [tableInternalName]
   );
 
   return SingletonConnection.instance
@@ -703,6 +703,76 @@ async function deleteRecord(tableInternalName, id) {
       return SingletonConnection.instance.execute(sql);
     })
 }
+
+/**
+ * 
+ * @param {string} tableInternalName 
+ * @param {number} id 
+ * @param {(string?)[]} payload 
+ */
+async function updateRecord(tableInternalName, id, payload) {
+  await SingletonConnection.connect();
+  const sql = format(`
+    SELECT information_schema.columns.column_name AS columnName
+    FROM information_schema.columns
+    WHERE
+      information_schema.columns.table_name = ?
+    ORDER BY information_schema.columns.ordinal_position
+    `,
+    [tableInternalName]
+  );
+
+  const [ _, ...cleanPayload ] = payload;
+
+  return SingletonConnection.instance
+    .execute(sql)
+    .then(([ columnNames ]) => {
+      const [ primaryKeyName, ...cleanColumnNames ] = columnNames.map(object => object.columnName);
+      // this code is potentionally dangerous, since it assumes the primary
+      // key of a table is always the first column
+
+      if (cleanColumnNames.length != cleanPayload.length) {
+        return Promise.reject(new Error(`Wrong number of fields given for the specified table (given ${cleanPayload.length}; expected ${cleanColumnNames.length})`));
+      }
+
+      const zipObject = {};
+      for (let i = 0; i < cleanColumnNames.length; i++) {
+        const key = cleanColumnNames[i];
+        const value = cleanPayload[i];
+        zipObject[key] = value;
+      }
+
+      let sql = format("UPDATE ?? SET ? WHERE ?? = ?", [ tableInternalName ]);
+      sql = format(sql, [zipObject]);
+      sql = format(sql, [ primaryKeyName ]);
+      sql = format(sql, [ id ]);
+
+      return SingletonConnection.instance.execute(sql);
+    })
+    ;
+}
+
+/**
+ * 
+ * @param {string} tableInternalName 
+ * @param {ExternalColumnType} selectedType
+ * @returns {Promise} 
+ */
+async function addColumn(tableInternalName, selectedType) {
+  await SingletonConnection.connect();
+
+  const newColumnName = `Nueva columna ${uuidv4()}`;
+  const coalescedType = TableCreationUtilities.coalesceColumnToSqlType(selectedType);
+
+  let sql = format(`ALTER TABLE ?? ADD COLUMN ?? ${coalescedType}`, [  ]);
+  sql = format(sql, [ tableInternalName ]);
+  sql = format(sql, [ newColumnName ]);
+
+  return SingletonConnection.instance
+    .execute(sql)
+    ;
+}
+
 
 module.exports = {
   getDatabases,
@@ -718,6 +788,7 @@ module.exports = {
   columnExists,
   columnIsPrimaryKey,
   tableExists,
+  updateRecord,
   createTable,
   createDatabase,
   deleteTable,
@@ -727,5 +798,6 @@ module.exports = {
   databaseExistsWithId,
   renameDatabase,
   renameColumn,
-  insertRecord
+  insertRecord,
+  addColumn
 }

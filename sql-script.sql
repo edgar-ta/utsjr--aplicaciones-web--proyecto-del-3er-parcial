@@ -191,3 +191,11 @@ WHERE
 	information_schema.columns.table_name = 'tabla' AND 
     information_schema.columns.column_key = 'PRI'
 ;
+
+SELECT information_schema.columns.column_name
+FROM information_schema.columns
+WHERE
+	information_schema.columns.ordinal_position != 1 AND
+    information_schema.columns.table_name = "tabla"
+ORDER BY information_schema.columns.ordinal_position
+;

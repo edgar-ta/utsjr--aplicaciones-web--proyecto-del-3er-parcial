@@ -1,3 +1,7 @@
+:root {
+    --input-padding: 1rem;
+}
+
 .visualizador-de-registros__checkbox-container {
     display: flex;
     justify-content: center;
@@ -149,7 +153,7 @@
 .visualizador-de-registros__new-record__input-wrapper, .visualizador-de-registros__record__td {
     display: flex;
     box-sizing: border-box;
-    padding: 10px;
+    padding: var(--input-padding);
     box-shadow: 0 0 5px #a0a0a0;
     border-radius: 3px;
     flex-grow: 1;
@@ -160,6 +164,7 @@
     font-size: 1rem;
     width: 100%;
     outline: none;
+    background-color: transparent;
 }
 
 .visualizador-de-registros__new-record-column {
@@ -222,12 +227,13 @@
 
 .visualizador-de-registros__record__td {
     position: relative;
+    transition: 250ms ease-in-out background-color;
 }
 
 .visualizador-de-registros__record__toolbar {
     position: absolute;
     top: 50%;
-    left: 0.25rem;
+    left: var(--input-padding);
     transform: translateY(-50%);
     display: flex;
     gap: 0.25rem;
@@ -241,4 +247,88 @@
 
 .visualizador-de-registros__record__input[data-is-primary-key], .visualizador-de-registros__new-record__input[data-is-primary-key] {
     text-align: right;
+}
+
+.visualizador-de-registros__record[data-is-edited="true"] .visualizador-de-registros__record__td {
+    background-color: #c2f0ff;
+}
+
+ .visualizador-de-registros__record__edition-button {
+    opacity: 0;
+    transition: 250ms ease-in-out opacity;
+}
+
+.visualizador-de-registros__record[data-is-edited="true"] .visualizador-de-registros__record__edition-button {
+    opacity: 1;
+}
+
+.visualizador-de-registros__record__td:has(.visualizador-de-registros__record__input[data-is-valid="false"]) {
+    background-color: #ffc0c0;
+}
+
+.visualizador-de-registros__record__td::after {
+    position: absolute;
+    top: calc(var(--input-padding) / 4);
+    left: 1rem;
+    color: red;
+    font-size: 0.5rem;
+}
+
+.visualizador-de-registros__record__td:has(.visualizador-de-registros__record__input[data-is-valid="false"])::after {
+    content: attr(data-validation-message);
+}
+
+.visualizador-de-registros__new-column-button {
+    position: relative;
+}
+
+.visualizador-de-registros__new-column-button__option-container {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 0.25rem);
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    transition: 
+        250ms ease-in-out height,
+        250ms ease-in-out opacity
+        ;
+    overflow: hidden;
+}
+
+.visualizador-de-registros__new-column-button[data-open] .visualizador-de-registros__new-column-button__option-container, 
+.visualizador-de-registros__new-column-button:hover .visualizador-de-registros__new-column-button__option-container
+{
+    opacity: 1;
+    height: 12rem;
+}
+
+.visualizador-de-registros__new-column-button__option-subcontainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-width: 100%;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+}
+
+.visualizador-de-registros__new-column-button__option {
+    display: inline-block;
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+    border-radius: 3px;
+    background-color: #e9e9ed;
+    border: 1px solid #a0a0a0;
+    transition: 250ms ease-in-out background-color;
+    color: black;
+    text-align: left;
+    text-decoration: none;
+    font-family: 'Inter';
+}
+
+.visualizador-de-registros__new-column-button__option:hover {
+    background-color: white;
 }

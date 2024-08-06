@@ -196,3 +196,154 @@ function setupNewRecordConstraints(newRecord) {
         validationForm.requestSubmit();
     });
 }
+
+/**
+ * Adds visual hints to indicate when an input's value is wrong
+ * @param {HTMLInputElement} input 
+ * @returns {boolean} Whether the input is valid or not
+ */
+function checkInputValidity(input) {
+    let isValid = input.checkValidity();
+    input.setAttribute("data-is-valid", isValid);
+    const inputContainer = input.parentElement;
+
+    if (input.getAttribute("data-is-unique") === "true") {
+        const isUnique = areValuesUnique(input.value, input.getAttribute("data-column-name"));
+        isValid = isValid && isUnique;
+    }
+
+    if (!isValid) {
+        const validationMessage = input.validationMessage;
+        inputContainer.setAttribute("data-validation-message", validationMessage);
+    } else {
+        inputContainer.removeAttribute("data-validation-message");
+    }
+
+    return isValid;
+}
+
+function checkRecordEdited(record) {
+    if (isRecordEdited(record)) {
+        record.setAttribute("data-is-edited", "true");
+    } else {
+        record.removeAttribute("data-is-edited", "false");
+    }
+}
+
+function getRecords() {
+    /** @type {HTMLTableElement} */
+    const recordsTable = document.querySelector("[data-id='records-table']");
+    const recordsTableBody = recordsTable.querySelector("tbody");
+    const records = Array.of(...recordsTableBody.querySelectorAll("tr").values());
+    return records;
+}
+
+
+/**
+ * 
+ * @param {HTMLTableRowElement} record 
+ * @returns {HTMLInputElement[]}
+ */
+function getEditableInputs(record) {
+    return Array.of(...record.querySelectorAll("input:not([disabled])").values());
+}
+
+/**
+ * 
+ * @param {HTMLTableRowElement} record 
+ * @returns {HTMLInputElement[]}
+ */
+function getAllInputs(record) {
+    return Array.of(...record.querySelectorAll("input").values());
+}
+
+/**
+ * 
+ * @param {HTMLTableRowElement} record 
+ */
+function isRecordEdited(record) {
+    const editableInputs = getEditableInputs(record);
+    return editableInputs.some((input) => input.value != input.getAttribute("value"));
+}
+
+function setupRecordConstraints() {
+    const records = getRecords();
+
+    records.forEach(record => {
+        /** @type {HTMLInputElement[]} */
+        const editableInputs = getEditableInputs(record);
+        editableInputs.forEach(input => {
+            input.addEventListener("input", (event) => {
+                checkInputValidity(input);
+                checkRecordEdited(record);
+            });
+        });
+
+        /** @type {HTMLButtonElement} */
+        const undoChangesButton = record.querySelector("[data-id='undo-changes-button']");
+        undoChangesButton.addEventListener("click", (event) => {
+            editableInputs.forEach(input => {
+                input.value = input.getAttribute("value");
+                record.removeAttribute("data-is-edited");
+                checkInputValidity(input);
+            });
+        });
+
+        /** @type {HTMLButtonElement} */
+        const saveChangesButtton = record.querySelector("[data-id='save-changes-button']");
+        saveChangesButtton.addEventListener("click", (event) => {
+            let alreadyFocused = false;
+            let isValid = true;
+
+            editableInputs.forEach(input => {
+                checkInputValidity(input);
+                if (!input.checkValidity()) {
+                    if (!alreadyFocused) {
+                        input.focus();
+                        alreadyFocused = true;
+                    }
+
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                console.log("Sending the form");
+
+                /** @type {HTMLFormElement} */
+                const updateForm = record.querySelector("[data-id='update-form']");
+                const inputs = getAllInputs(record);
+
+                if (updateForm.firstElementChild === null) {
+                    inputs.forEach(input => {
+                        const hiddenInput = document.createElement("input");
+                        hiddenInput.setAttribute("type", "hidden");
+                        hiddenInput.setAttribute("name", "payload");
+                        hiddenInput.setAttribute("value", input.value);
+    
+                        updateForm.appendChild(hiddenInput);
+                    });
+                }
+
+                updateForm.submit();
+            }
+        });
+    });
+}
+
+(() => {
+    getRecords().forEach(record => {
+        checkRecordEdited(record);
+        getEditableInputs(record).forEach(input => checkInputValidity(input));
+    });
+
+    /** @type {HTMLButtonElement} */
+    const newColumnButton = document.querySelector("[data-id='new-column-button']");
+    newColumnButton.addEventListener("click", () => {
+        newColumnButton.toggleAttribute("data-open");
+    });
+
+    newColumnButton.addEventListener("focusout", () => {
+        newColumnButton.removeAttribute("data-open");
+    });
+})();

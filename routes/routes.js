@@ -72,6 +72,18 @@ function ensureValidId(request, response, next) {
     return next();
 }
 
+function ensureValidType(request, response, next) {
+    /** @type {import("../bd/database-controller.js").ExternalColumnType} */
+    const selectedType = request.params.selectedType;
+
+    /** @type {import("../bd/database-controller.js").ExternalColumnType[]} */
+    const validTypes = [ "integer", "decimal", "date", "text" ];
+    if (!validTypes.includes(selectedType)) {
+        return next(new Error("The specified type is not recognized"));
+    }
+    return next();
+}
+
 ruta.get("/", async (request, response) => {
   response.render("index");
 });
@@ -285,7 +297,7 @@ ruta.get("/rename/database/:selectedTable/:selectedColumn", ensureValidTable, en
 ruta.post("/insert/:selectedDatabase/:selectedTable", ensureValidDatabase, ensureValidTable, async (request, response, next) => {
     const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
     const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
-    const payload = request.body.payload;
+    const payload = TableDataValidation.ensureArray(request.body.payload).map(value => value === ''? null: value);
     try {
         DatabaseController
             .insertRecord(tableIdentifier.internalName, payload)
@@ -314,5 +326,41 @@ ruta.get("/delete-record/:selectedDatabase/:selectedTable/:selectedId", ensureVa
         next(error);
     }
 });
+
+ruta.post("/update-record/:selectedDatabase/:selectedTable/:selectedId", ensureValidDatabase, ensureValidTable, ensureValidId, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedId = Number.parseInt(request.params.selectedId);
+    const payload = TableDataValidation.ensureArray(request.body.payload).map(value => value === ''? null: value);
+    
+    try {
+        DatabaseController
+            .updateRecord(tableIdentifier.internalName, selectedId, payload)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/new-column/:selectedDatabase/:selectedTable/:selectedType", ensureValidDatabase, ensureValidTable, ensureValidType, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedType = request.params.selectedType;
+    
+    try {
+        DatabaseController
+            .addColumn(tableIdentifier.internalName, selectedType)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
 
 module.exports = ruta;

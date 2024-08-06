@@ -20,12 +20,18 @@ const twoDigitRepresentation = (number) => {
 }
 
 const formatDate = (date) => {
+    if (date === null) return "";
     const [ month, day, year] = [
         date.getMonth(),
         date.getDate(),
         date.getFullYear(),
     ];
     return `${year}-${twoDigitRepresentation(month + 1)}-${twoDigitRepresentation(day)}`;
+}
+
+const formatString = (string) => {
+    if (string === null) return "";
+    return string;
 }
 
 %>
@@ -36,12 +42,44 @@ const formatDate = (date) => {
     </h1>
     <div class="visualizador__button-tray">
         <a class="visualizador__button visualizador__button--delete"
-            href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Eliminar tabla</a>
+            href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>"
+            >
+            Eliminar tabla
+        </a>
 
         <button class="visualizador__button visualizador__button--insert" data-id="insert-record-button">Insertar registro</button>
 
-        <a class="visualizador__button visualizador__button--edit"
-            href="/edit/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>">Editar tabla</a>
+        <button class="visualizador__button visualizador__button--edit visualizador-de-registros__new-column-button" data-id="new-column-button">
+            <span>Añadir columna</span>
+            <div class="visualizador-de-registros__new-column-button__option-container" data-id="new-column-button-content">
+                <div class="visualizador-de-registros__new-column-button__option-subcontainer">
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/integer"
+                        >
+                        Entero
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/decimal"
+                        >
+                        Decimal
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/date"
+                        >
+                        Fecha
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/text"
+                        >
+                        Texto
+                    </a>
+                </div>
+            </div>
+        </button>
     </div>
     <div data-id="new-record-container">
         <!--  -->
@@ -116,10 +154,14 @@ const formatDate = (date) => {
                                                 inputmode="numeric"
                                                 pattern="\d+"
                                                 step="1"
+                                                max="2147483647"
+                                                min="-2147483648"
                                             <% } %>
                                             <% if (columnObject.dataType == 'decimal') { %>
                                                 inputmode="numeric"
                                                 step="0.1"
+                                                max="2147483647"
+                                                min="-2147483648"
                                             <% } %>
                                             <% if (columnObject.isPrimaryKey) { %>
                                                 disabled
@@ -229,6 +271,12 @@ const formatDate = (date) => {
                             %>
                             <td class="visualizador-de-registros__record__td">
                                 <% if (i == 0) { %>
+                                    <form 
+                                        action="/update-record/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- record[nameOfPrimaryKey] %>"
+                                        data-id="update-form"
+                                        method="post"
+                                        >
+                                    </form>
                                     <div class="visualizador-de-registros__record__toolbar">
                                         <a 
                                             href="/delete-record/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- record[nameOfPrimaryKey] %>" 
@@ -236,9 +284,20 @@ const formatDate = (date) => {
                                             >
                                             <i class="fa-solid fa-x"></i>
                                         </a>
-                                        <a href="" class="square-button" title="Guardar cambios">
+                                        <button 
+                                            class="square-button visualizador-de-registros__record__edition-button" 
+                                            title="Guardar cambios" 
+                                            data-id="save-changes-button"
+                                            >
                                             <i class="fa-solid fa-check"></i>
-                                        </a>
+                                        </button>
+                                        <button 
+                                            class="square-button visualizador-de-registros__record__edition-button" 
+                                            title="Deshacer cambios" 
+                                            data-id="undo-changes-button"
+                                            >
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
                                     </div>
                                 <% } %>
                                 <input 
@@ -250,16 +309,20 @@ const formatDate = (date) => {
                                     <% if (columnObject.dataType == 'date') { %>
                                         value="<%- formatDate(record[columnObject.name]) %>"
                                     <% } else { %>
-                                        value="<%- record[columnObject.name] %>"
+                                        value="<%- formatString(record[columnObject.name]) %>"
                                     <% } %>
                                     <% if (columnObject.dataType == 'integer') { %>
                                         inputmode="numeric"
                                         pattern="\d+"
                                         step="1"
+                                        max="2147483647"
+                                        min="-2147483648"
                                     <% } %>
                                     <% if (columnObject.dataType == 'decimal') { %>
                                         inputmode="numeric"
-                                        step="0.1"
+                                        step="0.01"
+                                        max="2147483647"
+                                        min="-2147483648"
                                     <% } %>
                                     <% if (columnObject.isPrimaryKey) { %>
                                         disabled
@@ -280,7 +343,7 @@ const formatDate = (date) => {
         </table>
     </div>
     <% if (recordVisualizationPayload.records.length == 0) { %>
-        <h3>Aún no has ingresado registros en esta base de datos</h3>
+        <h3>Aún no has ingresado registros en esta tabla</h3>
         <img style="max-width: 100%;" src="/web/images/selecciona-una-base-de-datos.png" alt="">
     <% } %>
 </div>
@@ -289,4 +352,5 @@ const formatDate = (date) => {
 
 <script>
     setupColumnNameInputs("<%- getUrlForTable(recordVisualizationPayload.currentTable) %>");
+    setupRecordConstraints();
 </script>
