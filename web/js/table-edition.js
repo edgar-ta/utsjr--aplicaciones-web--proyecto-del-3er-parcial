@@ -130,33 +130,65 @@ function getNextRecordId() {
 
 /**
  * 
- * @param {string} currentValue 
+ * @param {string} columnName 
+ * @returns {string[]}
+ */
+function getRecordValues(columnName) {
+    const records = getRecords();
+    const recordsValues = records.map(record => {
+        const allInputs = record.querySelectorAll("input");
+        for (let input of allInputs) {
+            const currentColumnName = input.getAttribute("data-column-name");
+            if (currentColumnName === columnName) {
+                return input.value;
+            }
+        }
+    }).filter(value => value !== undefined);
+    return recordsValues;
+}
+
+/**
+ * Checks that the given value along with the values of the columns
+ * in the records table with the given column name are all unique among
+ * themselves
+ * @param {string?} currentValue 
  * @param {string} columnName 
  * @returns {boolean}
  */
 function areValuesUnique(currentValue, columnName) {
-    /** @type {HTMLTableElement} */
-    const recordsTable = document.querySelector("[data-id='records-table']");
-    const recordsTableBody = recordsTable.querySelector("tbody");
-
-    const rows = Array.of(...recordsTableBody.querySelectorAll("tr").values());
-    for (let row of rows) {
-        /** @type {HTMLInputElement[]} */
-        const inputs = Array.of(...row.querySelectorAll("data-column-name").values());
-        const selectedInput = inputs.find((input) => input.getAttribute("data-column-name") === columnName);
-        if (selectedInput === null) continue;
-        if (selectedInput.value === currentValue) return false;
+    const recordsValues = getRecordValues(columnName);
+    if (currentValue !== null) {
+        recordsValues.push(currentValue);
     }
-    return true;
+
+    const expectedSize = recordsValues.length;
+    const realSize = new Set(recordsValues).size;
+
+    return expectedSize === realSize;
 }
 
-function validateUniqueInputs(validationForm) {
+/**
+ * 
+ * @param {HTMLFormElement} validationForm 
+ */
+function validateUniqueInputsInNewRecord(validationForm) {
     /** @type {HTMLInputElement[]} */
     const uniqueInputs = Array.of(...validationForm.querySelectorAll("input[data-is-unique='true']").values());
     uniqueInputs.forEach(uniqueInput => {
         const currentValue = uniqueInput.value;
         const columnName = uniqueInput.getAttribute("data-column-name");
-        if (!areValuesUnique(currentValue, columnName)) {
+        const uniqueRecordValues = new Set(getRecordValues(columnName));
+
+        const previousSize = uniqueRecordValues.size;
+
+        uniqueRecordValues.add(currentValue);
+        const currentSize = uniqueRecordValues.size;
+
+        // TODO
+        if (previousSize !== currentSize) {
+            uniqueInput.setCustomValidity("");
+            console.log("El valor es único");
+        } else {
             uniqueInput.setCustomValidity("El valor ingresado debe ser único");
         }
     });
@@ -188,29 +220,29 @@ function setupNewRecordConstraints(newRecord) {
     saveButton.addEventListener("click", (event) => {
         const validationForm = newRecord.querySelector("form");
         const inputs = Array.of(...validationForm.querySelectorAll("input").values());
-
-        if (inputs.every(input => input.checkValidity())) {
-            validateUniqueInputs(validationForm);
-        }
+        
+        validateUniqueInputsInNewRecord(validationForm);
+        inputs.every(input => input.checkValidity());
 
         validationForm.requestSubmit();
     });
 }
 
 /**
- * Adds visual hints to indicate when an input's value is wrong
+ * Adds visual hints to indicate when an input's value in the records table is wrong
  * @param {HTMLInputElement} input 
  * @returns {boolean} Whether the input is valid or not
  */
 function checkInputValidity(input) {
     let isValid = input.checkValidity();
-    input.setAttribute("data-is-valid", isValid);
     const inputContainer = input.parentElement;
 
     if (input.getAttribute("data-is-unique") === "true") {
-        const isUnique = areValuesUnique(input.value, input.getAttribute("data-column-name"));
+        const isUnique = areValuesUnique(null, input.getAttribute("data-column-name"));
         isValid = isValid && isUnique;
     }
+
+    input.setAttribute("data-is-valid", isValid);
 
     if (!isValid) {
         const validationMessage = input.validationMessage;
