@@ -82,3 +82,46 @@ function setupColumnNameInputs(selectedTableUrl) {
     });
 }
 
+
+/** @type {HTMLButtonElement} */
+const insertionButton = document.querySelector("[data-id='insert-record-button']");
+insertionButton.addEventListener("click", (event) => {
+    const preexistentNewRecord = document.querySelector("[data-id='new-record']");
+    const newRecordExists = preexistentNewRecord !== null;
+    if (newRecordExists) {
+        /** @type {HTMLInputElement} */
+        const firstInput = preexistentNewRecord.querySelector("input:not([disabled])");
+        firstInput?.focus();
+        return;
+    }
+
+    /** @type {HTMLDivElement} */
+    const newRecordContainer = document.querySelector("[data-id='new-record-container']");
+
+    /** @type {HTMLTemplateElement} */
+    const newRecordTemplate = document.querySelector("[data-id='new-record-template']");
+
+    const newRecordFragment = document.importNode(newRecordTemplate.content, true);
+
+    /** @type {HTMLDivElement} */
+    const newRecord = newRecordFragment.querySelector("[data-id='new-record']");
+
+    setupNewRecordConstraints(newRecord);
+
+    newRecordContainer.appendChild(newRecord);
+});
+
+/**
+ * Sets the listeners that ensure the fields marked as unique are valid
+ * and also creates an automatic id for the new record; also, makes
+ * the 'cancel' button work
+ * @param {HTMLDivElement} newRecord 
+ */
+function setupNewRecordConstraints(newRecord) {
+    /** @type {HTMLButtonElement} */
+    const cancelButton = newRecord.querySelector("[data-id='cancel-button']");
+
+    cancelButton.addEventListener("click", (ever) => {
+        newRecord.remove();
+    });
+}

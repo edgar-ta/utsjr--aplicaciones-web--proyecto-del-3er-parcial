@@ -1,7 +1,8 @@
 <link rel="stylesheet" href="/web/css/visualizador.css">
+<link rel="stylesheet" href="/web/css/ui.css">
 
 <div class="visualizador__container" data-database-id="<%- dashboardPayload.currentDatabase.id %>">
-    <input data-id="database-name-input" type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador__heading" placeholder="Ingresa el nombre de tu BD">
+    <input title="Edita el nombre de tu base de datos" data-id="database-name-input" type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador__heading  openable-input underlined-input" placeholder="Ingresa el nombre de tu BD">
     <a class="visualizador__button visualizador__button--delete" href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>">Eliminar base de datos</a>
 
     <div class="dashboard__card-container">

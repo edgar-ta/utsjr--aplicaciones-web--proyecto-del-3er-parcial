@@ -1,22 +1,9 @@
 .visualizador__heading {
     color: black;
-    border: none;
     font-size: 3rem;
     width: 100%;
-    outline: none;
-    border-bottom: 1px solid #a0a0a0;
-    border-bottom-width: 1px;
-    transition: 
-        250ms ease-in-out border-bottom-color,
-        250ms ease-in-out border-bottom-width
-        ;
     font-family: 'Inter';
     font-weight: bolder;
-}
-
-.visualizador__header-input:focus {
-    border-bottom-color: black;
-    border-bottom-width: 1.5px;
 }
 
 .visualizador__container {
@@ -36,6 +23,8 @@
     font-size: 0.75rem;
     border-radius: 3px;
     transition: 250ms ease-in-out background-color;
+    border: none;
+    cursor: pointer;
 }
 
 .visualizador__button--delete {

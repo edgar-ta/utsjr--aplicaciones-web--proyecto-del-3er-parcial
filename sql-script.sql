@@ -184,19 +184,3 @@ WHERE information_schema.columns.COLUMN_KEY = "PRI"
         NOT isnull(information_schema.key_column_usage.referenced_table_name)
         ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
