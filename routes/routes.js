@@ -3,6 +3,7 @@ const DatabaseController = require("../bd/database-controller.js");
 const TableDataValidation = require("../lib/table-data-validation.js");
 const DashboardUtilities = require("../lib/dashboard-utilities.js");
 const { getRecordVisualizationPayload } = require("../lib/record-visualization.js");
+const { externalColumnTypeToSpanish } = require("../lib/single-function-files/external-column-type-to-spanish.js");
 
 async function ensureValidDatabase(request, response, next) {
     try {
@@ -42,6 +43,33 @@ async function ensureValidTable(request, response, next) {
     } catch (error) {
         return next(error);
     }
+}
+
+async function ensureValidColumn(request, response, next) {
+    try {
+        const selectedTable = request.params.selectedTable;
+        const tableIdentifier = DashboardUtilities.parseTableIdentifier(selectedTable);
+        const selectedColumn = request.params.selectedColumn;
+
+        await DatabaseController
+            .columnExists(tableIdentifier, selectedColumn)
+            .then((exists) => {
+                if (!exists) return Promise.reject(new Error("The given column doesn't exist in the table"));
+                return true;
+            });
+
+        return next();
+    } catch (error) {
+        return next(error);
+    }
+}
+
+function ensureValidId(request, response, next) {
+    const selectedId = Number.parseInt(request.params.selectedId);
+    if (Number.isNaN(selectedId) || selectedId <= 0) {
+        return next(new Error("The given record id is not valid"));
+    }
+    return next();
 }
 
 ruta.get("/", async (request, response) => {
@@ -86,11 +114,11 @@ ruta.get("/databases/:selectedDatabase/:selectedTable", ensureValidDatabase, ens
     try {
         const dashboardPayload = await DashboardUtilities.getDashboardPayload(request.params.selectedDatabase);
         const recordVisualizationPayload = await getRecordVisualizationPayload(request.params.selectedTable);
-        console.log(recordVisualizationPayload);
 
         response.render("dashboard", {
             getUrlForDatabase: DashboardUtilities.getUrlForDatabase,
             getUrlForTable: DashboardUtilities.getUrlForTable,
+            externalColumnTypeToSpanish,
             dashboardPayload,
             recordVisualizationPayload,
             dashboardMode: "records"
@@ -192,7 +220,23 @@ ruta.get("/delete/:selectedDatabase/:selectedTable", ensureValidDatabase, ensure
 
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}`);
     } catch (error) {
+        // response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+        next(error);
+    }
+});
+
+ruta.get("/delete/:selectedDatabase/:selectedTable/:selectedColumn", ensureValidDatabase, ensureValidTable, ensureValidColumn, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const columnName = request.params.selectedColumn;
+    try {
+        await DatabaseController
+            .deleteColumn(tableIdentifier, columnName);
+            
         response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+
+    } catch (error) {
+        console.log(error);
         next(error);
     }
 });
@@ -211,6 +255,60 @@ ruta.get("/rename/database", async (request, response, next) => {
                 response.send({ ok: false, error });
             })
             ;
+    } catch (error) {
+        response.send({ ok: false, error });
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/rename/database/:selectedTable/:selectedColumn", ensureValidTable, ensureValidColumn, async (request, response, next) => {
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedColumn = request.params.selectedColumn;
+    const name = request.query.name;
+    try {
+        DatabaseController
+            .renameColumn(tableIdentifier, selectedColumn, name)
+            .then(() => {
+                response.send({ ok: true, error: null });
+            })
+            .catch((error) => {
+                response.send({ ok: false, error });
+            });
+    } catch (error) {
+        response.send({ ok: false, error });
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.post("/insert/:selectedDatabase/:selectedTable", ensureValidDatabase, ensureValidTable, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const payload = request.body.payload;
+    try {
+        DatabaseController
+            .insertRecord(tableIdentifier.internalName, payload)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
+
+ruta.get("/delete-record/:selectedDatabase/:selectedTable/:selectedId", ensureValidDatabase, ensureValidTable, ensureValidId, async (request, response, next) => {
+    const databaseIdentifier = DashboardUtilities.parseDatabaseIdentifier(request.params.selectedDatabase);
+    const tableIdentifier = DashboardUtilities.parseTableIdentifier(request.params.selectedTable);
+    const selectedId = Number.parseInt(request.params.selectedId);
+    
+    try {
+        DatabaseController
+            .deleteRecord(tableIdentifier.internalName, selectedId)
+            .then(() => {
+                response.redirect(`/databases/${DashboardUtilities.getUrlForDatabase(databaseIdentifier)}/${DashboardUtilities.getUrlForTable(tableIdentifier)}`);
+            });
     } catch (error) {
         console.log(error);
         next(error);

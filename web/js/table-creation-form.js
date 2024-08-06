@@ -99,13 +99,8 @@ function setupTypeSelectFunctionality(row) {
     /** @type {HTMLInputElement} */
     const isPrimaryKeyRadioButton = row.querySelector("[data-id='column-is-primary-key']");
 
-    /** @type {HTMLInputElement} */
-    const isAutoincrementableCheckbox = row.querySelector("[data-id='column-is-autoincrementable']");
-
     const isUniqueCheckbox = row.querySelector("[data-id='column-is-unique']");
 
-    disableCheckboxWhen(columnTypeSelect, (type) => type != "integer",      isAutoincrementableCheckbox);
-    disableCheckboxWhen(columnTypeSelect, (type) => type != "integer",      isPrimaryKeyRadioButton);
     disableCheckboxWhen(columnTypeSelect, (type) => type == "text",         isUniqueCheckbox);
 
     isPrimaryKeyRadioButton.addEventListener("change", () => validateIsPrimaryKeyGroup());
@@ -225,6 +220,24 @@ function disableCheckboxWhen(input, predicate, checkbox, fakeState = false, even
 columnCountInput.addEventListener("input", (event) => updateTableColumnInputs());
 updateTableColumnInputs();
 
+(() => {
+    /** @type {HTMLTableRowElement} */
+    const firstRow = tableCreationForm.querySelector("tbody > tr");
+
+    const select = firstRow.querySelector("select");
+    select.toggleAttribute("disabled");
+
+    const expectedValues = [ true, false, true, true ];
+    /** @type {HTMLInputElement[]} */
+    const checkableInputs = Array.of(...firstRow.querySelectorAll("input[type='radio'],input[type='checkbox']").values());
+    for (let index = 0; index < checkableInputs.length; index++) {
+        const input = checkableInputs[index];
+        const value = expectedValues[index];
+        input.checked = value;
+        input.setAttribute("disabled", "true");
+    }
+})();
+
 const isInputCorrected = () => tableCreationForm.getAttribute("data-is-input-corrected") == "true";
 const setInputAsCorrected = () => tableCreationForm.setAttribute("data-is-input-corrected", "true");
 
@@ -232,7 +245,7 @@ tableCreationForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
     if (!isInputCorrected()) {
-        tableCreationForm.querySelectorAll("input[disabled][data-id='column-is-primary-key'],input[disabled][data-id='column-is-nullable'],input[disabled][data-id='column-is-unique'],input[disabled][data-id='column-is-autoincrementable']").forEach(input => {
+        tableCreationForm.querySelectorAll("input[disabled]").forEach(input => {
             // i don't really care about duplicating unchecked disabled inputs, since they already have the fallback
             // value that prevents them from going unnoticed
 
@@ -246,6 +259,14 @@ tableCreationForm.addEventListener("submit", (event) => {
             
                 input.insertAdjacentElement("afterend", newInput);
             }
+        });
+        tableCreationForm.querySelectorAll("select[disabled]").forEach(select => {
+            const newInput = document.createElement("input");
+            newInput.setAttribute("type", "hidden");
+            newInput.setAttribute("name", select.getAttribute("name"));
+            newInput.value = select.value;
+        
+            select.insertAdjacentElement("afterend", newInput);
         });
         setInputAsCorrected();
     }

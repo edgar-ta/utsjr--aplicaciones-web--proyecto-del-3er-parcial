@@ -411,7 +411,7 @@ async function tableExists(internalTableName) {
     FROM tabla 
     WHERE tabla.nombre_interno = ?
     `,
-    internalTableName
+    [internalTableName]
   );
   await SingletonConnection.connect();
 
@@ -464,7 +464,10 @@ async function createDatabase() {
     .execute("SELECT MAX(base_de_datos.id) AS lastId FROM base_de_datos")
     .then((results) => {
       const [ [ { lastId } ] ] = results;
-      const name = `Base de datos número ${lastId}`;
+      let name = `Base de datos número ${lastId}`;
+      if (lastId === null) {
+        name = "Nueva base de datos";
+      }
       const sql = format("INSERT INTO base_de_datos VALUES (NULL, ?)", [name]);
       return SingletonConnection.instance.execute(sql);
     })
@@ -474,7 +477,7 @@ async function createDatabase() {
 
 /**
  * @param {number} databaseId 
- * @returns {Promise<Response>}
+ * @returns {Promise}
  */
 async function deleteDatabase(databaseId) {
   await SingletonConnection.connect();
@@ -497,10 +500,22 @@ async function deleteDatabase(databaseId) {
  * 
  * @param {string} databaseId 
  * @param {string} name 
- * @returns {Promise<Response>}
+ * @returns {Promise}
  */
 async function renameDatabase(databaseId, name) {
   const sql = format(`UPDATE base_de_datos SET base_de_datos.nombre = ? WHERE base_de_datos.id = ?`, [ name, databaseId ]);
+  await SingletonConnection.connect();
+  return SingletonConnection.instance.execute(sql);
+}
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @param {string} name 
+ */
+async function renameColumn(tableIdentifier, columnName, name) {
+  const sql = format(`ALTER TABLE ?? RENAME COLUMN ?? TO ??`, [ tableIdentifier.internalName, columnName, name ]);
   await SingletonConnection.connect();
   return SingletonConnection.instance.execute(sql);
 }
@@ -552,6 +567,81 @@ async function createTable(externalTableName, databaseIdentifier, tableScheme) {
   }
 }
 
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @returns {Promise<boolean>}
+ */
+async function columnExists(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  const sql = format(
+    `SELECT COUNT(*) AS count 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE table_name = ? AND column_name = ?
+    `,
+    [ tableIdentifier.internalName, columnName ]
+  );
+  return SingletonConnection.instance.execute(sql).then(([ [ { count } ] ]) => count > 0);
+}
+
+/**
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ */
+async function columnIsPrimaryKey(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  const sql = format(
+    `SELECT column_key AS columnKey
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE 
+      table_name = ? AND 
+      column_name = ?
+    `, 
+    [ tableIdentifier.internalName, columnName ]
+  );
+  return SingletonConnection.instance
+    .execute(sql)
+    .then(([ [ { columnKey } ] ]) => columnKey === "PRI")
+    ;
+}
+
+/**
+ * 
+ * @param {import("../lib/dashboard-utilities.js").TableIdentifier} tableIdentifier 
+ * @param {string} columnName 
+ * @returns {Promise}
+ */
+async function deleteColumn(tableIdentifier, columnName) {
+  await SingletonConnection.connect();
+  return columnIsPrimaryKey(tableIdentifier, columnName)
+    .then((isPrimaryKey) => {
+      if (isPrimaryKey) return Promise.reject(new Error("The column to delete was a primary key"));
+      let sql = format(`ALTER TABLE ?? DROP COLUMN ??`, [ tableIdentifier.internalName, columnName ]);
+      return SingletonConnection.instance.execute(sql);
+    })
+    ;
+  // const sql = format(`
+  //   SELECT 
+  //     column_name AS columnName,
+  //     column_key AS columnKey
+  //   FROM INFORMATION_SCHEMA.COLUMNS 
+  //   WHERE 
+  //     table_name = ? AND 
+  //     ordinal_position = ? 
+  //   `,
+  //   [ tableIdentifier.internalName, columnName ]
+  // );
+  // return SingletonConnection.instance.execute(sql)
+  //   .then(([ [ { columnName, columnKey } ] ]) => {
+  //     if (columnKey === "PRI") return Promise.reject(new Error("The column to delete was a primary key"));
+  //     let sql = format(`ALTER TABLE ?? DROP COLUMN ??`, [ tableIdentifier.internalName, columnName ]);
+  //     return SingletonConnection.instance.execute(sql);
+  //   })
+  // ;
+}
+
 /**
  * 
  * @param {import("../lib/dashboard-utilities.js").DatabaseIdentifier} databaseIdentifier 
@@ -569,6 +659,51 @@ async function deleteTable(databaseIdentifier, tableIdentifier) {
   await SingletonConnection.instance.execute(recordDeletionSql);
 }
 
+/**
+ * 
+ * @param {string} tableInternalName 
+ * @param {string[]} payload
+ * @returns {Promise} 
+ */
+async function insertRecord(tableInternalName, payload) {
+  await SingletonConnection.connect();
+
+  let sql = format(`INSERT INTO ?? VALUES (NULL, ?)`, [ tableInternalName ]);
+  sql = format(sql, [ payload ]);
+  console.log(sql);
+
+  return SingletonConnection.instance.execute(sql);
+}
+
+/**
+ * 
+ * @param {string} tableInternalName 
+ * @param {number} id
+ * @returns {Promise} 
+ */
+async function deleteRecord(tableInternalName, id) {
+  await SingletonConnection.connect();
+
+  const tableIdSql = format(`
+    SELECT information_schema.columns.column_name AS columnName
+    FROM information_schema.columns 
+    WHERE 
+      information_schema.columns.table_name = ? AND 
+      information_schema.columns.column_key = 'PRI'
+    `,
+    tableInternalName
+  );
+
+  return SingletonConnection.instance
+    .execute(tableIdSql)
+    .then(([ [ { columnName } ] ]) => {
+      let sql = format(`DELETE FROM ?? WHERE ?? = ?`, [ tableInternalName ]);
+      sql = format(sql, [ columnName ]);
+      sql = format(sql, [ id ]);
+      return SingletonConnection.instance.execute(sql);
+    })
+}
+
 module.exports = {
   getDatabases,
   getDatabaseId,
@@ -580,11 +715,17 @@ module.exports = {
   getTableIdentifiers,
   getTableIdentifier,
   getDatabaseIdentifiers,
+  columnExists,
+  columnIsPrimaryKey,
   tableExists,
   createTable,
   createDatabase,
   deleteTable,
   deleteDatabase,
+  deleteRecord,
+  deleteColumn,
   databaseExistsWithId,
   renameDatabase,
+  renameColumn,
+  insertRecord
 }

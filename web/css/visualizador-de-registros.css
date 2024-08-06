@@ -1,2 +1,244 @@
+.visualizador-de-registros__checkbox-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    gap: 5px;
+}
+
+.visualizador-de-registros__checkbox {
+    display: flex;
+    flex-direction: column;
+    width: 2rem;
+    position: relative;
+    cursor: pointer;
+}
+
+.visualizador-de-registros__checkbox > span {
+    font-size: 0.75rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.visualizador-de-registros__checkbox > input {
+    width: 100%;
+    appearance: none;
+    aspect-ratio: 1 / 1;
+    background-color: white;
+    border-radius: 1000px;
+    border: none;
+    border: 1px solid #a0a0a0;
+    transition: 250ms ease-in-out background-color;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.visualizador-de-registros__checkbox > input:checked {
+    background-color: #e9e9ed;
+    color: black;   
+}
+
+.visualizador-de-registros__checkbox:hover > input {
+    background-color: #a0a0a0;
+}
+/* 
+.visualizador-de-registros__checkbox:has(input:checked) > span {
+    color: white;
+} */
+
+.visualizador-de-registros__tr > th {
+    width: 20vw;
+    min-width: 200px;
+    padding: 10px;
+}
+
+.visualizador-de-registros__table-wrapper {
+    width: 100%;
+    position: relative;
+    height: 100%;
+    overflow: scroll;
+    min-height: 70vh;
+}
+
+.visualizador-de-registros__table-wrapper[data-no-records] {
+    min-height: 25vh;
+}
+
+.visualizador-de-registros__table {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.visualizador-de-registros__column-header__name {
+    font-weight: normal;
+    width: 100%;
+    font-family: 'Inter';
+    font-size: 1rem;
+}
+
+.visualizador-de-registros__column-header__type {
+    color: lightgray;
+    width: 100%;
+    display: inline-flex;
+    font-size: smaller;
+    font-family: 'Inter';
+    text-transform: uppercase;
+}
+
+.visualizador-de-registros__tr {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.visualizador-de-registros__column-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__delete-column-button {
+    position: absolute !important;
+    right: 0.5rem;
+    top: 0.5rem;
+}
+
+.visualizador-de-registros__column-header-wrapper {
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem;
+    position: relative;
+}
+
+.visualizador-de-registros__new-record-container {
+    width: 100%;
+    overflow: scroll;
+    position: relative;
+    display: flex;
+    height: 9rem;
+}
+
+.visualizador-de-registros__new-record-subcontainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding-block: 2.5rem;
+    padding-inline: 1rem;
+    box-sizing: border-box;
+}
+
+.visualizador-de-registros__new-record {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    height: 100%;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__new-record > * {
+    width: 20vw;
+    min-width: 250px;
+}
+
+.visualizador-de-registros__new-record__title {
+    margin-bottom: 0;
+}
+
+.visualizador-de-registros__new-record__input-wrapper, .visualizador-de-registros__record__td {
+    display: flex;
+    box-sizing: border-box;
+    padding: 10px;
+    box-shadow: 0 0 5px #a0a0a0;
+    border-radius: 3px;
+    flex-grow: 1;
+}
+
+.visualizador-de-registros__new-record__input, .visualizador-de-registros__record__input {
+    border: none;
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+}
+
+.visualizador-de-registros__new-record-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.visualizador-de-registros__new-record__column-title {
+    text-transform: upper;
+    font-size: smaller;
+    font-family: 'Inter';
+    margin-bottom: 5px;
+    margin-top: 0;
+    margin-inline: 0;
+}
+
+.visualizador-de-registros-new-record__column-type {
+    color: #a0a0a0;
+}
+
+.visualizador-de-registros__new-record:hover .visualizador-de-registros__new-record__toolbar {
+    opacity: 1;
+}
+
+.visualizador-de-registros__new-record__wrapper {
+    position: relative;
+}
+
+.visualizador-de-registros__new-record__wrapper:hover .visualizador-de-registros__new-record__toolbar {
+    opacity: 1;
+}
+
+.visualizador-de-registros__new-record__toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: fit-content;
+    height: fit-content;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: calc(100% + 1rem);
+    opacity: 0;
+    transition: 250ms ease-in-out opacity;
+    box-sizing: border-box;
+    justify-content: center;
+}
 
 
+.visualizador-de-registros__record {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+}
+
+.visualizador-de-registros__record__tbody {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.visualizador-de-registros__record__td {
+    position: relative;
+}
+
+.visualizador-de-registros__record__toolbar {
+    position: absolute;
+    top: 50%;
+    left: 0.25rem;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: 250ms ease-in-out opacity;
+}
+
+.visualizador-de-registros__record:hover .visualizador-de-registros__record__toolbar {
+    opacity: 1;
+}
+
+.visualizador-de-registros__record__input[data-is-primary-key], .visualizador-de-registros__new-record__input[data-is-primary-key] {
+    text-align: right;
+}

@@ -1,34 +1,21 @@
 .visualizador__heading {
     color: black;
-    border: none;
     font-size: 3rem;
     width: 100%;
-    outline: none;
-    border-bottom: 1px solid #a0a0a0;
-    border-bottom-width: 1px;
-    transition: 
-        250ms ease-in-out border-bottom-color,
-        250ms ease-in-out border-bottom-width
-        ;
     font-family: 'Inter';
     font-weight: bolder;
-}
-
-.visualizador__header-input:focus {
-    border-bottom-color: black;
-    border-bottom-width: 1.5px;
 }
 
 .visualizador__container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    height: 100%;
 }
 
-.visualizador__delete-button {
+.visualizador__button {
     padding-block: 0.75rem;
     padding-inline: 1rem;
-    background-color: rgb(121, 9, 9);
     width: fit-content;
     text-decoration: none;
     color: white;
@@ -36,8 +23,35 @@
     font-size: 0.75rem;
     border-radius: 3px;
     transition: 250ms ease-in-out background-color;
+    border: none;
+    cursor: pointer;
 }
 
-.visualizador__delete-button:hover {
+.visualizador__button--delete {
+    background-color: rgb(121, 9, 9);
+}
+
+.visualizador__button--delete:hover {
     background-color: rgb(196, 0, 0);
+}
+
+.visualizador__button--insert {
+    background-color: rgb(150, 114, 16);
+}
+
+.visualizador__button--insert:hover {
+    background-color: rgb(150, 141, 16);
+}
+
+.visualizador__button--edit {
+    background-color: rgb(16, 119, 150);
+}
+
+.visualizador__button--edit:hover {
+    background-color: rgb(16, 88, 184);
+}
+
+.visualizador__button-tray {
+    display: flex;
+    gap: 1rem;
 }
