@@ -53,3 +53,17 @@
     border-bottom-color: black;
     border-bottom-width: 1.5px;
 }
+
+.heading {
+    color: black;
+    font-size: 3rem;
+    width: 100%;
+    font-family: 'Inter';
+    font-weight: bolder;
+}
+
+.regular-text {
+    text-transform: none;
+    font-family: 'Inter';
+    font-size: 1rem;
+}

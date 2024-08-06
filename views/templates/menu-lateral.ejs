@@ -8,7 +8,11 @@
             %>
                 <li>
                     <a href="/databases/<%- getUrlForDatabase(database) %>">
-                        <%- database.name %>
+                        <% if (database.name.length > 0) { %>
+                            <%- database.name %>
+                        <% } else { %>
+                            &lbrack; Base de datos sin nombre &rbrack;
+                        <% } %>
                     </a>
                 
                     <%

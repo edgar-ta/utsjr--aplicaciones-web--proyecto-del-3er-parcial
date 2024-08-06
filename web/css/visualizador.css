@@ -1,11 +1,3 @@
-.visualizador__heading {
-    color: black;
-    font-size: 3rem;
-    width: 100%;
-    font-family: 'Inter';
-    font-weight: bolder;
-}
-
 .visualizador__container {
     display: flex;
     flex-direction: column;

@@ -2,7 +2,21 @@
 <link rel="stylesheet" href="/web/css/ui.css">
 
 <div class="visualizador__container" data-database-id="<%- dashboardPayload.currentDatabase.id %>">
-    <input title="Edita el nombre de tu base de datos" data-id="database-name-input" type="text" name="" id="" value="<%- dashboardPayload.currentDatabase.name %>" class="visualizador__heading  openable-input underlined-input" placeholder="Ingresa el nombre de tu BD">
+    <input 
+        title="Edita el nombre de tu base de datos" 
+        data-id="database-name-input" 
+        type="text" 
+        name="" 
+        id="" 
+        value="<%- dashboardPayload.currentDatabase.name %>" 
+        class="heading openable-input underlined-input" placeholder="Ingresa el nombre de tu BD">
+    
+    <p class="regular-text">
+        Visualiza las tablas de tu base de datos; puedes cambiar el nombre de la misma dando
+        click en el título y escribiendo el nombre que deseas. También puedes eliminar la 
+        base de datos dando click en el botón de abajo.
+    </p>
+
     <a class="visualizador__button visualizador__button--delete" href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>">Eliminar base de datos</a>
 
     <div class="dashboard__card-container">

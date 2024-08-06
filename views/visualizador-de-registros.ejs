@@ -37,7 +37,7 @@ const formatString = (string) => {
 %>
 
 <div class="visualizador__container">
-    <h1 class="visualizador__heading">
+    <h1 class="heading">
         <%- recordVisualizationPayload.currentTable.externalName %>
     </h1>
     <div class="visualizador__button-tray">
@@ -85,6 +85,13 @@ const formatString = (string) => {
         <!--  -->
     </div>
     <h2>Visualizar registros actuales</h2>
+    <p class="regular-text">
+        Visualiza tus registros. Puedes editar los valores directamente; cuando termines, dale 
+        click al botón de guardar en la parte de la izquierda para actualizar tus registros, o revierte tus modificaciones 
+        con el botón de "Deshacer cambios". <br><br>
+        También puedes eliminar los registros, modificar el nombre de 
+        tus columnas, ver sus propiedades e incluso borrarlas.
+    </p>
     <div 
         class="visualizador-de-registros__table-wrapper"
         <% if (recordVisualizationPayload.records.length == 0) { %>
@@ -93,6 +100,12 @@ const formatString = (string) => {
         >
         <template data-id="new-record-template">
             <h2 data-id="new-record-title" class="visualizador-de-registros__new-record__title">Editar nuevo registro</h2>
+            <p class="regular-text">
+                Inserta los valores del nuevo registro que quieres ingresar, cuidando respetar la estructura de la 
+                tabla (es decir, el tipo de dato, si es nulo, único, etc). Cuando termines dale click al botón de 
+                "Guardar datos" en la izquierda, y si cambias de opinión, cancela la inserción del nuevo registro 
+                con el botón de "Cancelar".
+            </p>
             <div data-id="new-record" class="visualizador-de-registros__new-record__wrapper">
                 <div class="visualizador-de-registros__new-record__toolbar">
                     <button data-id="save-button" class="square-button" title="Guardar">
@@ -159,7 +172,7 @@ const formatString = (string) => {
                                             <% } %>
                                             <% if (columnObject.dataType == 'decimal') { %>
                                                 inputmode="numeric"
-                                                step="0.1"
+                                                step="0.01"
                                                 max="2147483647"
                                                 min="-2147483648"
                                             <% } %>
