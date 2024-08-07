@@ -205,10 +205,10 @@ function setupNewRecordConstraints(newRecord) {
     const cancelButton = newRecord.querySelector("[data-id='cancel-button']");
 
     cancelButton.addEventListener("click", (event) => {
-        const newRecordTitle = document.querySelector("[data-id='new-record-title']");
-
+        const newRecordExplanation = document.querySelector("[data-id='new-record-explanation']");
+        
+        newRecordExplanation.remove();
         newRecord.remove();
-        newRecordTitle.remove();
     });
 
     /** @type {HTMLInputElement} */

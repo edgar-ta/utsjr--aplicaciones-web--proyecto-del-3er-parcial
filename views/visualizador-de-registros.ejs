@@ -99,13 +99,15 @@ const formatString = (string) => {
         <% } %>
         >
         <template data-id="new-record-template">
-            <h2 data-id="new-record-title" class="visualizador-de-registros__new-record__title">Editar nuevo registro</h2>
-            <p class="regular-text">
-                Inserta los valores del nuevo registro que quieres ingresar, cuidando respetar la estructura de la 
-                tabla (es decir, el tipo de dato, si es nulo, único, etc). Cuando termines dale click al botón de 
-                "Guardar datos" en la izquierda, y si cambias de opinión, cancela la inserción del nuevo registro 
-                con el botón de "Cancelar".
-            </p>
+            <div data-id="new-record-explanation">
+                <h2 class="visualizador-de-registros__new-record__title">Editar nuevo registro</h2>
+                <p class="regular-text">
+                    Inserta los valores del nuevo registro que quieres ingresar, cuidando respetar la estructura de la 
+                    tabla (es decir, el tipo de dato, si es nulo, único, etc). Cuando termines dale click al botón de 
+                    "Guardar datos" en la izquierda, y si cambias de opinión, cancela la inserción del nuevo registro 
+                    con el botón de "Cancelar".
+                </p>
+            </div>
             <div data-id="new-record" class="visualizador-de-registros__new-record__wrapper">
                 <div class="visualizador-de-registros__new-record__toolbar">
                     <button data-id="save-button" class="square-button" title="Guardar">
