@@ -37,7 +37,7 @@ app.use("/web", express.static(path.join(__dirname, "/web")));
 
 app.use("/", routes);
 
-// app.use((error, request, response, next) => {
-//     response.status(500);
-//     response.render("error", { error });
-// });
+app.use((error, request, response, next) => {
+    response.status(500);
+    response.render("error", { error });
+});
