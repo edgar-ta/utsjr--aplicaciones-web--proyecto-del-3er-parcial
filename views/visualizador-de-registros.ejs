@@ -40,6 +40,11 @@ const formatString = (string) => {
     <h1 class="heading">
         <%- recordVisualizationPayload.currentTable.externalName %>
     </h1>
+    <p class="regular-text">
+        Interactúa con la tabla que creaste; añade columnas del tipo que desees con el botón azul,
+        inserta un nuevo registro con el botón amarillo y, de ser necesario, elimina la tabla
+        por completo con el botón rojo
+    </p>
     <div class="visualizador__button-tray">
         <a class="visualizador__button visualizador__button--delete"
             href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>"
@@ -86,11 +91,14 @@ const formatString = (string) => {
     </div>
     <h2>Visualizar registros actuales</h2>
     <p class="regular-text">
-        Visualiza tus registros. Puedes editar los valores directamente; cuando termines, dale 
-        click al botón de guardar en la parte de la izquierda para actualizar tus registros, o revierte tus modificaciones 
-        con el botón de "Deshacer cambios". <br><br>
-        También puedes eliminar los registros, modificar el nombre de 
-        tus columnas, ver sus propiedades e incluso borrarlas.
+        Visualiza y edita tus registros directamente al darle click a las inputs de la tabla siguiente. 
+        Al editar un registro, este se vuelve de color azul, y en caso de ingresar valores incorrectos, 
+        las celdas de dichos valores se vuelven rojas; en la primera columna de la tabla (es decir,
+        la de la clave primaria) hay botones contextuales que aparecen al pasar el cursor sobre el registro,
+        con los cuales se pueden revertir los cambios hechos, borrar el registro, o guardar los cambios.
+        <br><br>
+        El encabezado de la tabla es interactivo, de modo que es posible editar una columna
+        al darle click a la input su nombre, e incluso borrarla con el botón de "X" en la parte superior derecha.
     </p>
     <div 
         class="visualizador-de-registros__table-wrapper"

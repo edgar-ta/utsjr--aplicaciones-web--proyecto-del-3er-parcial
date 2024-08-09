@@ -241,8 +241,31 @@ updateTableColumnInputs();
 const isInputCorrected = () => tableCreationForm.getAttribute("data-is-input-corrected") == "true";
 const setInputAsCorrected = () => tableCreationForm.setAttribute("data-is-input-corrected", "true");
 
+/**
+ * Returns a value indicating whether the column name inputs have
+ * values that are all unique among themselves
+ */
+function areColumnNamesUnique() {
+    /** @type {HTMLInputElement[]} */
+    const columnNameInputs = Array.of(...tableCreationForm.querySelectorAll("[data-id='column-name']").values());
+    const columnNames = columnNameInputs.map(columnName => columnName.value);
+
+    const originalLength = columnNames.length;
+    const uniqueLength = new Set(columnNames).size;
+
+    return originalLength === uniqueLength;
+}
+
 tableCreationForm.addEventListener("submit", (event) => {
     event.preventDefault();
+    if (!areColumnNamesUnique()) {
+        alert("Las columnas de la tabla deben tener nombres únicos entre sí");
+        return;
+    }
+
+    if (!tableCreationForm.checkValidity()) {
+        return;
+    }
 
     if (!isInputCorrected()) {
         tableCreationForm.querySelectorAll("input[disabled]").forEach(input => {
@@ -270,6 +293,6 @@ tableCreationForm.addEventListener("submit", (event) => {
         });
         setInputAsCorrected();
     }
-    
+
     tableCreationForm.submit();
 });
