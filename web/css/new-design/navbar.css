@@ -186,7 +186,8 @@
     .navbar__menu-panel__item:not(.navbar__menu-panel__item--squared) {
         aspect-ratio: auto;
         transform: none;
-    }    
+        transition: none;
+    }
 
     .navbar__imagotype-container {
         transform: none;

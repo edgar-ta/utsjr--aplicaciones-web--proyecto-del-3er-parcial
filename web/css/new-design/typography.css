@@ -1,15 +1,24 @@
-.text-small, .text-regular {
+.text-small, .text-regular, .text-large, .heading-regular {
     font-family: 'Inter';
+    margin: 0;
 }
 
 .text-small {
     font-size: 0.65rem;
-    margin: 0;
 }
 
 .text-regular {
     font-size: 0.75rem;
-    margin: 0;
+}
+
+.text-large {
+    font-size: 1rem;
+}
+
+.heading-regular {
+    font-weight: 800;
+
+    font-size: 2rem;
 }
 
 /* references var(--mobile-width) */
@@ -20,6 +29,14 @@
 
     .text-regular {
         font-size: 1rem;
+    }
+
+    .text-large {
+        font-size: 1.25rem;
+    }
+
+    .heading-regular {
+        font-size: 4rem;
     }
 }
 
