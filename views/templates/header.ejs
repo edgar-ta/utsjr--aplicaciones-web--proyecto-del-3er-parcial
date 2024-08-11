@@ -10,27 +10,16 @@
     <title>Proyecto Del Tercer Parcial</title>
 
     <link rel="stylesheet" href="/web/css/main.css">
-    <link rel="stylesheet" href="/web/css/navbar.css">
+
+    <link rel="stylesheet" href="/web/css/new-design/typography.css">
+    <link rel="stylesheet" href="/web/css/new-design/main.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@100..900&family=Krona+One&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
 </head>
-<body style="background-color: var(--main-blue);">
+<body style="background-color: var(--white-color);">
  
-    <nav class="navbar" data-id="sidebar" data-state="closed">
-        <div class="logo">
-            <img src="/web/images/logo-ut.png" alt="Logo" />
-        </div>
-        <ul class="nav-links">
-            <li><a href="/">Inicio</a></li>
-            <li class="dropdown">
-                <a href="/databases" class="dropbtn">Bases de Datos</a>
-                <div class="dropdown-content" id="dropdown-content">
-                    <!-- Las bases de datos y tablas se insertarán aquí dinámicamente -->
-                </div>
-            </li>
-        </ul>
-    </nav>
+    <%- include('./navbar.ejs') %>
 </body>
 </html>
