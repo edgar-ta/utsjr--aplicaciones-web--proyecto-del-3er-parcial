@@ -145,7 +145,7 @@
     z-index: 5;
 }
 
-@media (min-width: 430px) {
+@media (min-width: 653px) {
     .navbar {
         height: 5rem;
         padding-right: var(--wrapper__padding-x--desktop);

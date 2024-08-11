@@ -1,4 +1,4 @@
-.text-small, .text-regular, .text-large, .heading-regular {
+.text-small, .text-regular, .text-large, .heading-regular, .heading-small {
     font-family: 'Inter';
     margin: 0;
 }
@@ -21,8 +21,14 @@
     font-size: 2rem;
 }
 
+.heading-small {
+    font-weight: 700;
+
+    font-size: 1.75rem;
+}
+
 /* references var(--mobile-width) */
-@media (min-width: 430px) {
+@media (min-width: 653px) {
     .text-small {
         font-size: 0.75rem;
     }
@@ -37,6 +43,10 @@
 
     .heading-regular {
         font-size: 4rem;
+    }
+
+    .heading-small {
+        font-size: 3rem;
     }
 }
 
