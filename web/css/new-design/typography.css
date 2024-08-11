@@ -1,0 +1,25 @@
+.text-small, .text-regular {
+    font-family: 'Inter';
+}
+
+.text-small {
+    font-size: 0.65rem;
+    margin: 0;
+}
+
+.text-regular {
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+/* references var(--mobile-width) */
+@media (min-width: 430px) {
+    .text-small {
+        font-size: 0.75rem;
+    }
+
+    .text-regular {
+        font-size: 1rem;
+    }
+}
+
