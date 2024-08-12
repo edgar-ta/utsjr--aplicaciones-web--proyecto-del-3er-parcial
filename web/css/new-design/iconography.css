@@ -1,0 +1,32 @@
+.social-media-icon-regular, .social-media-icon-large {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    aspect-ratio: 1 / 1;
+}
+
+.social-media-icon-regular > img, .social-media-icon-large > img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: 100%;
+}
+
+.social-media-icon-large {
+    height: 30px;
+}
+
+.social-media-icon-regular {
+    height: 20px;
+}
+
+@media (min-width: 653px) {
+    .social-media-icon-large {
+        height: 40px;
+    }
+
+    .social-media-icon-regular {
+        height: 24px;
+    }
+}
