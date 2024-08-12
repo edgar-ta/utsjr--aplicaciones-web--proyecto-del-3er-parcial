@@ -85,11 +85,64 @@ function ensureValidType(request, response, next) {
     }
     return next();
 }
+// Middleware para agregar `username` y `role` a `res.locals` en todas las rutas
+ruta.use((req, res, next) => {
+    console.log("req.session:", req.session);
+    if (req.session && req.session.user) {
+        res.locals.username = req.session.user.username; // Agrega el username a `res.locals`
+        res.locals.role = req.session.user.role; // Agrega el role a `res.locals`
+    } else {
+        res.locals.username = null; // No hay usuario en sesión
+        res.locals.role = null; // No hay rol
+    }
+    next();
+});
 
+// Middleware de autenticación
+const authMiddleware = (req, res, next) => {
+    if (req.session && req.session.user) {
+        next(); // Usuario autenticado, continuar con la solicitud
+    } else {
+        res.redirect('/login'); // Usuario no autenticado, redirigir al login
+    }
+};
 ruta.get("/", async (request, response) => {
   response.render("login");
 });
+const isAdmin = (req, res, next) => {
+    if (req.session && req.session.user && req.session.user.role === 'admin') {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+};
+// Ruta para mostrar los usuarios y gestionar accesos
+ruta.get('/access', isAdmin, async (req, res, next) => {
+    try {
+        const connection = await SingletonConexion.connect();
+        const [users] = await connection.query('SELECT id, username, role FROM users');
+        await SingletonConexion.disconnect();
+        res.render('access', { users });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+});
 
+// Ruta para actualizar el rol de un usuario
+ruta.post('/access/:id', isAdmin, async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const newRole = req.body.role;
+
+        const connection = await SingletonConexion.connect();
+        await connection.query('UPDATE users SET role = ? WHERE id = ?', [newRole, userId]);
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+    // No cierres la conexión aquí si quieres mantener el pool abierto
+});
 ruta.get("/databases", async (request, response, next) => {
     try {
         console.log(response.locals.role);
@@ -364,26 +417,7 @@ ruta.get("/new-column/:selectedDatabase/:selectedTable/:selectedType", ensureVal
         next(error);
     }
 });
-// Middleware para agregar `username` y `role` a `res.locals` en todas las rutas
-ruta.use((req, res, next) => {
-    if (req.session && req.session.user) {
-        res.locals.username = req.session.user.username; // Agrega el username a `res.locals`
-        res.locals.role = req.session.user.role; // Agrega el role a `res.locals`
-    } else {
-        res.locals.username = null; // No hay usuario en sesión
-        res.locals.role = null; // No hay rol
-    }
-    next();
-});
 
-// Middleware de autenticación
-const authMiddleware = (req, res, next) => {
-    if (req.session && req.session.user) {
-        next(); // Usuario autenticado, continuar con la solicitud
-    } else {
-        res.redirect('/login'); // Usuario no autenticado, redirigir al login
-    }
-};
 
 ruta.get('/login', (req, res) => {
     if (req.session && req.session.user) {

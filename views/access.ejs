@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Acceso</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Asegúrate de tener los estilos adecuados -->
+</head>
+<body>
+    <header>
+        <h1>Gestión de Acceso</h1>
+        <nav>
+            <!-- Incluye aquí el header.ejs si es necesario -->
+        </nav>
+    </header>
+    <main>
+        <h2>Usuarios</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.id %></td>
+                        <td><%= user.username %></td>
+                        <td>
+                            <%= user.role %>
+                        </td>
+                        <td>
+                            <% if (user.role === 'user') { %>
+                                <form action="/access/<%= user.id %>" method="POST">
+                                    <input type="hidden" name="role" value="admin">
+                                    <button type="submit">Dar Admin</button>
+                                </form>
+                            <% } else { %>
+                                <form action="/access/<%= user.id %>" method="POST">
+                                    <input type="hidden" name="role" value="user">
+                                    <button type="submit">Quitar admin</button>
+                                </form>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </main>
+    <footer>
+        <!-- Incluye aquí el footer.ejs si es necesario -->
+    </footer>
+</body>
+</html>

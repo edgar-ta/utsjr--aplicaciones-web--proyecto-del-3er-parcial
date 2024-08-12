@@ -20,34 +20,17 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false } // Cambia a true si usas HTTPS
 }));
+
+app.use((req, res, next) => {
+    res.locals.username = req.session.user ? req.session.user.username : null;
+    res.locals.role = req.session.user ? req.session.user.role : null;
+    next();
+});
 const server = app.listen(port, async () => {
     console.log(`http://localhost:${port}`);
 
     SingletonConexion.connect();
 });
-// Middleware para agregar `username` a `res.locals` en todas las rutas
-app.use((req, res, next) => {
-    if (req.session && req.session.user) {
-        res.locals.username = req.session.user.username; // Agrega el username a `res.locals`
-    } else {
-        res.locals.username = null; // No hay usuario en sesión
-    }
-    next();
-});
-
-process.once("SIGINT", async () => {
-    server.close(async () => {
-        console.log("Cerrando la conexión");
-        SingletonConexion.disconnect();
-    });
-});
-
-app.on("SIGINT", async () => {
-    server.close(async () => {
-        console.log("Cerrando la conexión");
-        SingletonConexion.disconnect();
-    });
-})
 
 app.use("/web", express.static(path.join(__dirname, "/web")));
 
@@ -57,3 +40,13 @@ app.use((error, request, response, next) => {
     response.status(500);
     response.render("error", { error });
 });
+// Configuración del middleware global
+
+app.on("SIGINT", async () => {
+    server.close(async () => {
+        console.log("Cerrando la conexión");
+       await SingletonConexion.disconnect();
+       process.exit(0);
+    });
+})
+
