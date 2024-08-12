@@ -1,0 +1,84 @@
+*{
+    font-family: 'inter', sans-serif;
+}
+body{
+    background: whitesmoke;   
+}
+.container{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 400px;
+    background: white;
+    border: 2px solid rgb(199, 197, 197);
+    border-radius: 3px;
+    box-shadow: 5px 5px 10px  rgb(172, 171, 171);
+}
+
+.container h1{
+    text-align: center;
+    padding: 0 0 20px 0;
+}
+.container h4{
+    text-align: left;
+    padding: 0 0 20px 0;
+    margin-left: 28px;
+    font-size: 14px;
+    margin-bottom: 3px;
+    margin-top: 3px;
+}
+.container .username{
+    position: relative;
+    margin-bottom: -2px;
+    width: 82%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.container .password{
+    position: relative;
+    margin-bottom: -2px;
+    width: 82%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.container .role{
+    position: relative;
+    width: 87%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    padding: 10px;
+}
+button[type="submit"]{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 85%;
+    height: 35px;
+    background-color: rgba(2, 132, 199, 1);
+    color: white;
+    cursor: pointer;
+    outline: none;
+    border: 1px solid;
+    font-size: 16px;
+    margin-top: 45px;
+}
+
+button[type="submit"]:hover{
+    border-color: rgb(1, 42, 63);
+    transition: .5s;
+}
