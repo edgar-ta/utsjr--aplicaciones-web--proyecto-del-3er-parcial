@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="/web/css/menu-lateral.css">
+
+<div class="sidebar__panel" data-id="sidebar" data-state="open">
+    <ul>
+        <h1>Bases de Datos</h1>
+            <% 
+            for (let database of dashboardPayload.databases) {
+            %>
+                <li>
+                    <a href="/databases/<%- getUrlForDatabase(database) %>">
+                        <% if (database.name.length > 0) { %>
+                            <%- database.name %>
+                        <% } else { %>
+                            &lbrack; Base de datos sin nombre &rbrack;
+                        <% } %>
+                    </a>
+                
+                    <%
+                        if (dashboardPayload.currentDatabase !== null && dashboardPayload.currentDatabase.id === database.id) {
+                    %>
+                            
+                        <ul data-current-database-anchor>
+                            <% 
+                            for (let table of dashboardPayload.currentTables) {
+                            %>
+                                <li> 
+                                    <a href="/databases/<%- getUrlForDatabase(database) %>/<%- getUrlForTable(table) %>">
+                                        <%- table.externalName %>
+                                    </a>
+                                </li>
+                            <%
+                            }
+                            %>
+                        </ul>
+                    <%
+                        }
+                    %>
+                </li>
+            <%
+            }
+            %>
+        <a href="/new/database">Crear base de datos</a>
+    </ul>
+</div>
+
+<script src="/web/js/menu-lateral.js"></script>

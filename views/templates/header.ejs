@@ -1,0 +1,39 @@
+
+<!-- views/templates/header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Edgar Trejo Avila">
+    <title>Proyecto Del Tercer Parcial</title>
+
+    <link rel="stylesheet" href="/web/css/main.css">
+    <link rel="stylesheet" href="/web/css/navbar.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@100..900&family=Krona+One&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: var(--main-blue);">
+ 
+    <nav class="navbar" data-id="sidebar" data-state="closed">
+        <div class="logo">
+            <img src="/web/images/logo-ut.png" alt="Logo" />
+        </div>
+        <ul class="nav-links">
+            <li><a href="/">Inicio</a></li>
+            <li><%= username %></li>
+            <li><a href="/logout">Cerrar Sesion</a></li>
+            
+            <li class="dropdown">
+                <a href="/databases" class="dropbtn">Bases de Datos</a>
+                <div class="dropdown-content" id="dropdown-content">
+                    <!-- Las bases de datos y tablas se insertarán aquí dinámicamente -->
+                </div>
+            </li>
+        </ul>
+    </nav>
+</body>
+</html>

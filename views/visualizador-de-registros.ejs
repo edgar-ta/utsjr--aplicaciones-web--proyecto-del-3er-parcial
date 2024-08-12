@@ -1,0 +1,379 @@
+<link rel="stylesheet" href="/web/css/visualizador-de-registros.css">
+<link rel="stylesheet" href="/web/css/visualizador.css">
+<link rel="stylesheet" href="/web/css/ui.css">
+
+<%
+
+const externalColumnTypeToInputType = (type) => {
+    switch (type) {
+        case "integer":
+        case "decimal": 
+            return "number"
+        default: 
+            return type
+    }
+}
+
+const twoDigitRepresentation = (number) => {
+    if (number < 10) return `0${number}`;
+    return `${number}`;
+}
+
+const formatDate = (date) => {
+    if (date === null) return "";
+    const [ month, day, year] = [
+        date.getMonth(),
+        date.getDate(),
+        date.getFullYear(),
+    ];
+    return `${year}-${twoDigitRepresentation(month + 1)}-${twoDigitRepresentation(day)}`;
+}
+
+const formatString = (string) => {
+    if (string === null) return "";
+    return string;
+}
+
+%>
+
+<div class="visualizador__container">
+    <h1 class="heading">
+        <%- recordVisualizationPayload.currentTable.externalName %>
+    </h1>
+    <p class="regular-text">
+        Interactúa con la tabla que creaste; añade columnas del tipo que desees con el botón azul,
+        inserta un nuevo registro con el botón amarillo y, de ser necesario, elimina la tabla
+        por completo con el botón rojo
+    </p>
+    <div class="visualizador__button-tray">
+        <a class="visualizador__button visualizador__button--delete"
+            href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>"
+            >
+            Eliminar tabla
+        </a>
+
+        <button class="visualizador__button visualizador__button--insert" data-id="insert-record-button">Insertar registro</button>
+
+        <button class="visualizador__button visualizador__button--edit visualizador-de-registros__new-column-button" data-id="new-column-button">
+            <span>Añadir columna</span>
+            <div class="visualizador-de-registros__new-column-button__option-container" data-id="new-column-button-content">
+                <div class="visualizador-de-registros__new-column-button__option-subcontainer">
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/integer"
+                        >
+                        Entero
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/decimal"
+                        >
+                        Decimal
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/date"
+                        >
+                        Fecha
+                    </a>
+                    <a 
+                        class="visualizador-de-registros__new-column-button__option"
+                        href="/new-column/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/text"
+                        >
+                        Texto
+                    </a>
+                </div>
+            </div>
+        </button>
+    </div>
+    <div data-id="new-record-container">
+        <!--  -->
+    </div>
+    <h2>Visualizar registros actuales</h2>
+    <p class="regular-text">
+        Visualiza y edita tus registros directamente al darle click a las inputs de la tabla siguiente. 
+        Al editar un registro, este se vuelve de color azul, y en caso de ingresar valores incorrectos, 
+        las celdas de dichos valores se vuelven rojas; en la primera columna de la tabla (es decir,
+        la de la clave primaria) hay botones contextuales que aparecen al pasar el cursor sobre el registro,
+        con los cuales se pueden revertir los cambios hechos, borrar el registro, o guardar los cambios.
+        <br><br>
+        El encabezado de la tabla es interactivo, de modo que es posible editar una columna
+        al darle click a la input de su nombre, e incluso borrarla con el botón de "X" en la parte superior derecha.
+    </p>
+    <div 
+        class="visualizador-de-registros__table-wrapper"
+        <% if (recordVisualizationPayload.records.length == 0) { %>
+        data-no-records="true"
+        <% } %>
+        >
+        <template data-id="new-record-template">
+            <div data-id="new-record-explanation">
+                <h2 class="visualizador-de-registros__new-record__title">Editar nuevo registro</h2>
+                <p class="regular-text">
+                    Inserta los valores del nuevo registro que quieres ingresar, cuidando respetar la estructura de la 
+                    tabla (es decir, el tipo de dato, si es nulo, único, etc). Cuando termines dale click al botón de 
+                    "Guardar datos" en la izquierda, y si cambias de opinión, cancela la inserción del nuevo registro 
+                    con el botón de "Cancelar".
+                </p>
+            </div>
+            <div data-id="new-record" class="visualizador-de-registros__new-record__wrapper">
+                <div class="visualizador-de-registros__new-record__toolbar">
+                    <button data-id="save-button" class="square-button" title="Guardar">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                    <button data-id="cancel-button" class="square-button" title="Cancelar">
+                        <i class="fa-solid fa-x"></i>
+                    </button>
+                </div>
+                <div class="visualizador-de-registros__new-record-container">
+                    <div class="visualizador-de-registros__new-record-subcontainer">
+                        <form 
+                            style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);"
+                            class="visualizador-de-registros__new-record" 
+                            action="/insert/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>" 
+                            method="post"
+                            >
+                            <% for (let columnObject of recordVisualizationPayload.schema) { %>
+                                <div class="visualizador-de-registros__new-record-column">
+                                    <p class="visualizador-de-registros__new-record__column-title">
+                                        <% if (columnObject.isPrimaryKey) { %>
+                                            <i class="fa-solid fa-key"></i>
+                                        <% } else {
+                                            switch (columnObject.dataType) {
+                                                case "integer": %>
+                                                    <i class="fa-solid fa-calculator"></i>
+                                                <% break; %>
+
+                                                <% case "decimal": %>
+                                                    <i class="fa-solid fa-percent"></i>
+                                                <% break; %>
+
+                                                <% case "text": %>
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                <% break; %>
+
+                                                <% case "date": %>
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                <% break; 
+                                            } 
+                                        }
+                                        %>
+                                        <%- columnObject.name %>
+                                        &nbsp;
+                                        <span class="visualizador-de-registros-new-record__column-type">
+                                            &lpar;
+                                            <%- externalColumnTypeToSpanish(columnObject.dataType) %>
+                                            &rpar;
+                                        </span>
+                                    </p>
+                                    <div class="visualizador-de-registros__new-record__input-wrapper">
+                                        <input 
+                                            type="<%- externalColumnTypeToInputType(columnObject.dataType) %>" 
+                                            class="visualizador-de-registros__new-record__input openable-input"
+                                            name="payload"
+                                            data-column-name="<%- columnObject.name %>"
+                                            id=""
+                                            <% if (columnObject.dataType == 'integer') { %>
+                                                inputmode="numeric"
+                                                pattern="\d+"
+                                                step="1"
+                                                max="2147483647"
+                                                min="-2147483648"
+                                            <% } %>
+                                            <% if (columnObject.dataType == 'decimal') { %>
+                                                inputmode="numeric"
+                                                step="0.01"
+                                                max="2147483647"
+                                                min="-2147483648"
+                                            <% } %>
+                                            <% if (columnObject.isPrimaryKey) { %>
+                                                disabled
+                                                data-is-primary-key="true"
+                                            <% } %>
+                                            <% if (!columnObject.isNullable) { %>
+                                                required
+                                            <% } %>
+                                            <% if (columnObject.isUnique) { %>
+                                                data-is-unique="true"
+                                            <% } %>
+                                            >
+                                    </div>
+                                </div>
+                            <% } %>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <table class="visualizador-de-registros__table" data-id="records-table">
+            <thead>
+                <tr style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);" class="visualizador-de-registros__tr">
+                    <% 
+                    for (let i = 0; i < recordVisualizationPayload.schema.length; i++) {
+                        const columnObject = recordVisualizationPayload.schema[i];
+                        %> 
+                        <th>
+                            <div class="visualizador-de-registros__column-header-wrapper">
+                                <div class="visualizador-de-registros__column-header" data-datatype="<%- columnObject.dataType %>">
+                                    <span class="visualizador-de-registros__column-header__type">
+                                        <% if (columnObject.isPrimaryKey) { %>
+                                            <i class="fa-solid fa-key"></i>
+                                        <% } else {
+                                            switch (columnObject.dataType) {
+                                                case "integer": %>
+                                                    <i class="fa-solid fa-calculator"></i>
+                                                <% break; %>
+
+                                                <% case "decimal": %>
+                                                    <i class="fa-solid fa-percent"></i>
+                                                <% break; %>
+
+                                                <% case "text": %>
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                <% break; %>
+
+                                                <% case "date": %>
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                <% break; 
+                                            } 
+                                        }
+                                        %>
+                                        &nbsp;
+                                        <%- externalColumnTypeToSpanish(columnObject.dataType) %>
+                                    </span>
+                                    <input title="Edita el nombre de la columna" data-id="column-name-input" data-column-name="<%- columnObject.name %>" class="visualizador-de-registros__column-header__name openable-input underlined-input" value="<%- columnObject.name %>"/>
+                                </div>
+                                <div class="visualizador-de-registros__checkbox-container">
+                                    <label for="" title="<%- columnObject.isPrimaryKey? "Es": "No Es" %> Clave Primaria" class="visualizador-de-registros__checkbox">
+                                        <span>
+                                            P
+                                        </span>
+                                        <input disabled type="checkbox" name="" id="" <% if (columnObject.isPrimaryKey) { %> checked <% } %> >
+                                    </label>
+                                    <label for="" title="<%- columnObject.isUnique? "Es": "No Es" %> Único" class="visualizador-de-registros__checkbox">
+                                        <span>
+                                            U
+                                        </span>
+                                        <input disabled type="checkbox" name="" id="" <% if (columnObject.isUnique) { %> checked <% } %> >
+                                    </label>
+                                    <label for="" title="<%- columnObject.isAutoincrementable? "Es": "No Es" %> Autoincrementable" class="visualizador-de-registros__checkbox">
+                                        <span>
+                                            A
+                                        </span>
+                                        <input disabled type="checkbox" name="" id="" <% if (columnObject.isAutoincrementable) { %> checked <% } %> >
+                                    </label>
+                                    <label for="" title="<%- columnObject.isNullable? "Es": "No Es" %> Nulo" class="visualizador-de-registros__checkbox">
+                                        <span>
+                                            N
+                                        </span>
+                                        <input disabled type="checkbox" name="" id="" <% if (columnObject.isNullable) { %> checked <% } %> >
+                                    </label>
+                                </div>
+                                <% if (i != 0) { %>
+                                    <a class="square-button visualizador-de-registros__delete-column-button"
+                                        href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- columnObject.name %>"
+                                        title="Eliminar columna"
+                                        >
+                                        <i class="fa-solid fa-x"></i>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </th>
+                    <%
+                    }
+                        
+                    %>
+                </tr>
+            </thead>
+            <tbody class="visualizador-de-registros__record__tbody">
+                <% for (let record of recordVisualizationPayload.records) { %>
+                    <tr class="visualizador-de-registros__record" style="grid-template-columns: repeat(<%- recordVisualizationPayload.schema.length %>, 1fr);">
+                        <% for (let i = 0; i < recordVisualizationPayload.schema.length; i++) { 
+                            const columnObject = recordVisualizationPayload.schema[i];
+                            const nameOfPrimaryKey = recordVisualizationPayload.schema[0].name;
+                            %>
+                            <td class="visualizador-de-registros__record__td">
+                                <% if (i == 0) { %>
+                                    <form 
+                                        action="/update-record/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- record[nameOfPrimaryKey] %>"
+                                        data-id="update-form"
+                                        method="post"
+                                        >
+                                    </form>
+                                    <div class="visualizador-de-registros__record__toolbar">
+                                        <a 
+                                            href="/delete-record/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(recordVisualizationPayload.currentTable) %>/<%- record[nameOfPrimaryKey] %>" 
+                                            class="square-button" title="Eliminar registro"
+                                            >
+                                            <i class="fa-solid fa-x"></i>
+                                        </a>
+                                        <button 
+                                            class="square-button visualizador-de-registros__record__edition-button" 
+                                            title="Guardar cambios" 
+                                            data-id="save-changes-button"
+                                            >
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                        <button 
+                                            class="square-button visualizador-de-registros__record__edition-button" 
+                                            title="Deshacer cambios" 
+                                            data-id="undo-changes-button"
+                                            >
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                    </div>
+                                <% } %>
+                                <input 
+                                    type="<%- externalColumnTypeToInputType(columnObject.dataType) %>" 
+                                    class="visualizador-de-registros__record__input openable-input"
+                                    name="payload"
+                                    data-column-name="<%- columnObject.name %>"
+                                    id=""
+                                    <% if (columnObject.dataType == 'date') { %>
+                                        value="<%- formatDate(record[columnObject.name]) %>"
+                                    <% } else { %>
+                                        value="<%- formatString(record[columnObject.name]) %>"
+                                    <% } %>
+                                    <% if (columnObject.dataType == 'integer') { %>
+                                        inputmode="numeric"
+                                        pattern="\d+"
+                                        step="1"
+                                        max="2147483647"
+                                        min="-2147483648"
+                                    <% } %>
+                                    <% if (columnObject.dataType == 'decimal') { %>
+                                        inputmode="numeric"
+                                        step="0.01"
+                                        max="2147483647"
+                                        min="-2147483648"
+                                    <% } %>
+                                    <% if (columnObject.isPrimaryKey) { %>
+                                        disabled
+                                        data-is-primary-key="true"
+                                    <% } %>
+                                    <% if (!columnObject.isNullable) { %>
+                                        required
+                                    <% } %>
+                                    <% if (columnObject.isUnique) { %>
+                                        data-is-unique="true"
+                                    <% } %>
+                                    >
+                            </td>
+                        <% } %>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+    <% if (recordVisualizationPayload.records.length == 0) { %>
+        <h3>Aún no has ingresado registros en esta tabla</h3>
+        <img style="max-width: 100%;" src="/web/images/selecciona-una-base-de-datos.png" alt="">
+    <% } %>
+</div>
+
+<script src="/web/js/table-edition.js"></script>
+
+<script>
+    setupColumnNameInputs("<%- getUrlForTable(recordVisualizationPayload.currentTable) %>");
+    setupRecordConstraints();
+</script>

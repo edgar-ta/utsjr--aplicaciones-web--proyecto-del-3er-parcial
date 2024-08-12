@@ -1,0 +1,102 @@
+<%- include('./templates/long-header.ejs') %>
+        <link rel="stylesheet" href="/web/css/crear-tabla.css">
+        <template data-id="column-referenced-table-form-template">
+            <div data-id="column-referenced-table-form">
+                <h1>Tabla referenciada</h1>
+                <select name="referencedTableArray" required data-id="column-referenced-table-select">
+                    <% for (let i = 0; i < dashboardPayload.currentTables.length; i++) { 
+                        const table = dashboardPayload.currentTables[i];
+                        %>
+                        <option value="<%- table.internalName %>" <% if (i == 0) { %> selected <% } %> ><%- table.externalName %></option>
+                    <% } %>
+                </select>
+            </div>
+        </template>
+
+        <template data-id="column-template">
+            <tr>
+                <td class="id" data-id="column-index-cell">#</td>
+                <td>
+                    <input type="text" name="nameArray" required data-id="column-name" value="">
+                </td>
+                <td data-id="column-type-cell">
+                    <select name="dataTypeArray" required data-id="column-type-select">
+                        <option value="integer" selected>
+                            Entero
+                        </option>
+                        <option value="decimal">
+                            Decimal
+                        </option>
+                        <option value="date">
+                            Fecha
+                        </option>
+                        <option value="text">
+                            Texto
+                        </option>
+                        <% if (dashboardPayload.currentTables.length > 0 && false) { %>
+                            <option value="reference">
+                                Referencia
+                            </option>
+                        <% } %>
+                    </select>
+                </td>
+                <td>
+                    <input type="hidden" name="isPrimaryKeyArray" value="none">
+                    <input type="radio" name="isPrimaryKeyArray" disabled data-disabled-count="0" required data-id="column-is-primary-key">
+                </td>
+                <td>
+                    <input type="hidden" name="isNullableArray" value="none">
+                    <input type="checkbox" name="isNullableArray" data-disabled-count="0" data-id="column-is-nullable">
+                </td>
+                <td>
+                    <input type="hidden" name="isUniqueArray" value="none">
+                    <input type="checkbox" name="isUniqueArray" data-disabled-count="0" data-id="column-is-unique">
+                </td>
+                <td>
+                    <input type="hidden" name="isAutoincrementableArray" value="none">
+                    <input type="checkbox" name="isAutoincrementableArray" disabled data-disabled-count="0" data-id="column-is-autoincrementable">
+                </td>
+            </tr>
+        </template>
+        <section>
+            <h1>Crear tabla</h1>
+            <form 
+                action="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" 
+                id="createTableForm" 
+                method="post" 
+                data-id="table-creation-form" 
+                data-is-input-corrected="false"
+                data-unchecked-value="none"
+                >
+            <div class="Info">
+                <div class="Name">
+                    <label for="tableNameInput">Nombre de la tabla</label>
+                    <input type="text" name="tableName" id="tableNameInput" placeholder="Nombre de la tabla" required>
+                </div>
+                <div class="colum">
+                    <label for="columnCountInput">Número de columnas</label>
+                    <input type="number" name="columnCount" id="columnCountInput" value="1" min="1" max="30" required>
+                </div>
+                <input class="button" type="submit" value="Crear tabla">
+            </div>
+                <table id="tableExample">
+                    <thead>
+                        <tr>
+                            <th>Índice</th>
+                            <th>Nombre</th>
+                            <th>Tipo de dato</th>
+                            <th>Es clave primaria</th>
+                            <th>Es nulo</th>
+                            <th>Es único</th>
+                            <th>Es autoincrementable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </form>
+        </section>
+    </div>
+
+    <script defer src="/web/js/table-creation-form.js"></script>
+<%- include('./templates/long-footer.ejs') %>

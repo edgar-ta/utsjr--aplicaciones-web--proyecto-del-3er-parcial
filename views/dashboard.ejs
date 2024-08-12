@@ -1,0 +1,17 @@
+<%- include("./templates/long-header.ejs"); %>
+        <% 
+        if (dashboardMode === "tables") { 
+        %>
+            <%- include("./visualizador-de-tablas") %>
+        <%
+        } else if (dashboardMode === "records") {
+        %>
+            <%- include("./visualizador-de-registros") %>
+        <%
+        } else {
+        %>
+            <%- include("./selecciona-una-bd")  %>
+        <%
+        }
+        %>
+<%- include("./templates/long-footer.ejs"); %>

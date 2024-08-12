@@ -1,0 +1,16 @@
+<%- include("./templates/header.ejs"); %>
+
+<link rel="stylesheet" href="/web/css/index.css">
+
+<div style=" flex-direction: column; padding-inline: 12rem; background-color: white; box-sizing: border-box; display: flex; width: 100%; min-height: 100vh;">
+    <h1 style="color: black; font-size: 4rem;">
+        Algo salió mal :&lpar;
+    </h1>
+    
+    <p style="color: black; font-size: 2rem;">
+        <%- error.message %>
+    </p>
+</div>
+
+
+<%- include("./templates/footer.ejs"); %>

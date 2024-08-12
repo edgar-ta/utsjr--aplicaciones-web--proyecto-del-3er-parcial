@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="/web/css/visualizador.css">
+<link rel="stylesheet" href="/web/css/ui.css">
+
+<div class="visualizador__container" data-database-id="<%- dashboardPayload.currentDatabase.id %>">
+    <input 
+        title="Edita el nombre de tu base de datos" 
+        data-id="database-name-input" 
+        type="text" 
+        name="" 
+        id="" 
+        value="<%- dashboardPayload.currentDatabase.name %>" 
+        class="heading openable-input underlined-input" placeholder="Ingresa el nombre de tu BD">
+    
+    <p class="regular-text">
+        Visualiza las tablas de tu base de datos; puedes cambiar el nombre de la misma dando
+        click en el título y escribiendo el nombre que deseas. También puedes eliminar la 
+        base de datos dando click en el botón de abajo.
+    </p>
+
+    <a class="visualizador__button visualizador__button--delete" href="/delete/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>">Eliminar base de datos</a>
+
+    <div class="dashboard__card-container">
+        <a href="/new/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/table" class="dashboard__table-card dashboard__table-card--new-card">
+            <div class="dashboard__table-card__image-wrapper">
+                <div class="dashboard__table-card__image" style="background-image: url(/web/images/plus-icon.png);"></div>
+            </div>
+            <span class="dashboard__table-card__name">
+                Crear tabla
+            </span>
+        </a>
+        <%
+            for (let table of dashboardPayload.currentTables) {
+        %>
+            <a class="dashboard__table-card" href="/databases/<%- getUrlForDatabase(dashboardPayload.currentDatabase) %>/<%- getUrlForTable(table) %>">
+                <div class="dashboard__table-card__image-wrapper">
+                    <div class="dashboard__table-card__image"></div>
+                </div>
+                <span class="dashboard__table-card__name">
+                    <%= table.externalName %>
+                </span>
+            </a>
+        <%
+        }
+        %>
+    </div>
+</div>
+
+<script src="/web/js/database-edition.js"></script>
