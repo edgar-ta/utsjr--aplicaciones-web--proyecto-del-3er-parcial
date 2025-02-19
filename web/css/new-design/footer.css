@@ -101,3 +101,12 @@
     }
 }
 
+
+.footer__creators-link {
+    color: lightgray;
+    transition: 200ms ease-in-out color;
+}
+
+.footer__creators-link:hover {
+    color: white;
+}
