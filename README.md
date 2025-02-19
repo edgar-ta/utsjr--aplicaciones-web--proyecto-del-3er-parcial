@@ -86,4 +86,12 @@ basado en cuatrimestres).
 
 ![Inserción de Registros](--documentation-assets/record-insertion.png)
 
+### Ruta de About Us - Parte 1
+
+![Ruta de About Us - Parte 1](--documentation-assets/about-us-route-1.png)
+
+### Ruta de About Us - Parte 2
+
+![Ruta de About Us - Parte 2](--documentation-assets/about-us-route-2.png)
+
 ![Pie de página oficial de la universidad](./assets/footer.png "UTSJR")
