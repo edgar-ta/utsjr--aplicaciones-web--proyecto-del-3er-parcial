@@ -4,8 +4,9 @@
 
 ![Página de inicio del proyecto](./--documentation-assets/index-page.png "Página de inicio")
 
-Este es un proyecto para la clase de Aplicaciones Web del profesor René Santos Osorio,
-para la Universidad Tecnológica de San Juan del Río.
+Éste es un SGBD para las clases de Aplicaciones Web del profesor René Santos Osorio y Bases
+de Datos para Aplicaciones de la profesora Luz María Feregrino Martínez, para la Universidad 
+Tecnológica de San Juan del Río.
 
 ## Tecnologías Utilizadas
 
