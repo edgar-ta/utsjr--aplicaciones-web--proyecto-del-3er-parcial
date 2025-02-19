@@ -2,6 +2,8 @@
 
 ![Encabezado oficial de la universidad](./assets/header.png "UTSJR")
 
+![Página de inicio del proyecto](./--documentation-assets/index-page.png "Página de inicio")
+
 ## Descripción
 
 Este es un proyecto para la clase de Aplicaciones Web del profesor René Santos Osorio,
