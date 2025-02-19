@@ -284,32 +284,6 @@ async function getIndexedTablesWithBothNames(selectedDatabase) {
  * @returns {Promise<OutgoingColumnDescriptor[]>}
  */
  async function getSchema(tableInternalName) {
-  // /** @type {OutgoingColumnDescriptor} */
-  // const something = {};
-  // something.;
-
-  // const sql = format(`
-  //   SELECT 
-  //     information_schema.columns.COLUMN_NAME AS name, 
-  //     information_schema.columns.DATA_TYPE AS dataType, 
-  //     information_schema.columns.COLUMN_KEY = "PRI" AS isPrimaryKey,
-  //     information_schema.columns.COLUMN_key = "UNI" as isUnique,
-  //     information_schema.columns.EXTRA = "auto_increment" AS isAutoincrementable,
-  //     information_schema.columns.IS_NULLABLE = "YES" AS isNullable,
-  //       information_schema.columns.COLUMN_NAME IN (
-  //       SELECT DISTINCT (information_schema.key_column_usage.column_name)
-  //       FROM information_schema.key_column_usage
-  //       INNER JOIN information_schema.table_constraints
-  //       ON information_schema.key_column_usage.constraint_name = information_schema.table_constraints.constraint_name
-  //       WHERE 
-  //         information_schema.key_column_usage.table_name = ? AND 
-  //         information_schema.table_constraints.constraint_type = "FOREIGN KEY"
-  //     ) AS isForeignKey
-  //   FROM information_schema.columns
-  //   WHERE information_schema.columns.TABLE_NAME = ?
-  //   ORDER BY ORDINAL_POSITION ASC;
-  //   `, [tableInternalName, tableInternalName]
-  // );
   const sql = format(`
     SELECT 
       information_schema.columns.COLUMN_NAME AS name, 
@@ -349,53 +323,6 @@ async function getIndexedTablesWithBothNames(selectedDatabase) {
   const primitiveColumns = indexedSchema.filter(columnObject => !columnObject.isForeignKey);
   /** @type {OutgoingColumnDescriptor[]} */
   const referenceColumns = indexedSchema.filter(columnObject =>  columnObject.isForeignKey);
-
-  // /** @type {OutgoingColumnDescriptor[]} */
-  // const resolvedReferenceColumns = await Promise.all(referenceColumns.map(async (columnObject) => {
-  //   // referenced table and valid values for reference
-
-  //   console.log("The column name is");
-  //   console.log(columnObject.name);
-
-  //   console.log("The table is");
-  //   console.log(tableInternalName);
-
-  //   const referencedColumnAndTableSql = format(`
-  //     SELECT 
-  //       information_schema.key_column_usage.referenced_table_name AS referencedTable,
-  //       information_schema.key_column_usage.referenced_column_name AS referencedColumn
-  //     FROM information_schema.key_column_usage
-  //     WHERE 
-  //       information_schema.key_column_usage.column_name = ? AND
-  //       information_schema.key_column_usage.table_name = ? AND
-  //       NOT isnull(information_schema.key_column_usage.referenced_table_name)
-  //     `, [columnObject.name, tableInternalName]
-  //   );
-
-  //   /** @type {{ referencedTable: string, referencedColumn: string }[][]} */
-  //   const [ [ { referencedTable, referencedColumn } ] ] = await SingletonConnection.instance.execute(referencedColumnAndTableSql);
-    
-  //   console.log("The referenced table is");
-  //   console.log(referencedTable);
-
-  //   console.log("The referenced column is");
-  //   console.log(referencedColumn);
-
-  //   const referencedTableIdentifier = await getTableIdentifier(referencedTable);
-  //   const sql = format(`SELECT * FROM ??`, [referencedTable]);
-
-  //   /** @type {Object[]} */
-  //   const [ validValues ] = await SingletonConnection.instance.execute(sql);
-
-  //   /** @type {import("../lib/dashboard-utilities.js").RecordIdentifier[]} */
-  //   const recordIdentifers = validValues.map(value => ({ id: value[referencedColumn], representation: value.toString() }))
-
-  //   return {
-  //     ...columnObject,
-  //     referencedTable: referencedTableIdentifier,
-  //     validValues: recordIdentifers
-  //   };
-  // }));
 
   return [  ...primitiveColumns, ...referenceColumns ].sort((a, b) => a.index - b.index);
 }
@@ -622,24 +549,6 @@ async function deleteColumn(tableIdentifier, columnName) {
       return SingletonConnection.instance.execute(sql);
     })
     ;
-  // const sql = format(`
-  //   SELECT 
-  //     column_name AS columnName,
-  //     column_key AS columnKey
-  //   FROM INFORMATION_SCHEMA.COLUMNS 
-  //   WHERE 
-  //     table_name = ? AND 
-  //     ordinal_position = ? 
-  //   `,
-  //   [ tableIdentifier.internalName, columnName ]
-  // );
-  // return SingletonConnection.instance.execute(sql)
-  //   .then(([ [ { columnName, columnKey } ] ]) => {
-  //     if (columnKey === "PRI") return Promise.reject(new Error("The column to delete was a primary key"));
-  //     let sql = format(`ALTER TABLE ?? DROP COLUMN ??`, [ tableIdentifier.internalName, columnName ]);
-  //     return SingletonConnection.instance.execute(sql);
-  //   })
-  // ;
 }
 
 /**
