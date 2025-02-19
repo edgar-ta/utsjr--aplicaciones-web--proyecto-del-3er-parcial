@@ -51,4 +51,38 @@ de Desarrollo y Gestión de Software y decidimos juntarnos para terminar este pr
 que tenemos que preocuparnos en el cuatrimestre que vamos cursando (nuestra universidad lleva un plan
 basado en cuatrimestres).
 
+## Imágenes
+
+### Página de Inicio
+
+![Página de Inicio](--documentation-assets/index-page.png)
+
+### Componente Footer
+
+![Componente Footer](--documentation-assets/footer-component.png)
+
+### Ruta de Bases de Datos
+
+![Ruta de Bases de Datos](--documentation-assets/databases-route.png)
+
+### Ruta de una Sola Base de Datos
+
+![Ruta de una Sola Base de Datos](--documentation-assets/single-database-route.png)
+
+### Ruta de una Sola Tabla
+
+![Ruta de una Sola Tabla](--documentation-assets/single-table-route.png)
+
+### Ruta de Creación de Tablas
+
+![Ruta de Creación de Tablas](--documentation-assets/table-creation-route.png)
+
+### Visualización de Registros
+
+![Visualización de Registros](--documentation-assets/record-visualization.png)
+
+### Inserción de Registros
+
+![Inserción de Registros](--documentation-assets/record-insertion.png)
+
 ![Pie de página oficial de la universidad](./assets/footer.png "UTSJR")
