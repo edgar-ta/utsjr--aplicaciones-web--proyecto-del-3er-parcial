@@ -3,19 +3,33 @@
     --accent-color: #0284C7;
     --black-color: black;
     --white-color: white;
-    --wrapper__padding-x--desktop: 10%;
-    --wrapper__padding-x--mobile: 15px;
 
-    --mobile-width: 430px;
+    --wrapper__padding-x--desktop: 10vw;
+    --wrapper__padding-x--mobile: 15px;
+    --wrapper__padding-x: var(--wrapper__padding-x--mobile);
+
+    --mobile-width: 653px;
+}
+
+.wrapper {
+    padding-inline: var(--wrapper__padding-x--mobile);
 }
 
 .fenix-db-isotype, .utsjr-logo {
     height: 50px;
 }
 
-@media (min-width: 430px) {
+@media (min-width: 653px) {
+    :root {
+        --wrapper__padding-x: var(--wrapper__padding-x--desktop);
+    }
+
     .fenix-db-isotype, .utjsr-logo {
         height: 90px;
+    }
+
+    .wrapper {
+        padding-inline: var(--wrapper__padding-x--desktop);
     }
 }
 

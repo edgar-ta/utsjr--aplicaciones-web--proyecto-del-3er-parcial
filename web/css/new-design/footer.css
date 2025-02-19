@@ -67,7 +67,7 @@
 }
 
 /* references var(--mobile-width) */
-@media (min-width: 430px) {
+@media (min-width: 653px) {
     .footer {
         padding-inline: var(--wrapper__padding-x--desktop);
     }

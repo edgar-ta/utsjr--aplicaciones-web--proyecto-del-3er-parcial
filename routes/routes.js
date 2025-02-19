@@ -362,5 +362,6 @@ ruta.get("/new-column/:selectedDatabase/:selectedTable/:selectedType", ensureVal
     }
 });
 
+ruta.get("/about-us", (request, response) => response.render("about-us"));
 
 module.exports = ruta;

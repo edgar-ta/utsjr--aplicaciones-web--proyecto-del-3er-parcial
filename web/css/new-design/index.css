@@ -50,7 +50,7 @@
         ;
 }
 
-@media (min-width: 430px) {
+@media (min-width: 653px) {
     .index__hero-container {
         width: calc(100% - 2 * var(--wrapper__padding-x--desktop));
     }
